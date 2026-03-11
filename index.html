@@ -1,45 +1,165 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Test QR Scanner</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>QR Scanner Telegram</title>
+    <!-- Script Telegram Web App -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Menggunakan variabel warna Telegram agar cocok dengan tema HP */
+        body {
+            font-family: sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container { width: 100%; max-width: 500px; text-align: center; }
+        #videoContainer { position: relative; width: 100%; background: #000; border-radius: 10px; overflow: hidden; }
+        #video { width: 100%; height: auto; display: block; }
+        #canvas { display: none; }
+        #scanLine { position: absolute; width: 100%; height: 2px; background: var(--tg-theme-button-color, #00ff00); top: 0; left: 0; box-shadow: 0 0 10px var(--tg-theme-button-color, #00ff00); animation: scan 2s linear infinite; }
+        @keyframes scan { 0% { top: 0%; } 50% { top: 98%; } 100% { top: 0%; } }
+        #result { padding: 15px; background: var(--tg-theme-secondary-bg-color, #f0f0f0); border-radius: 5px; margin-top: 20px; word-break: break-all; }
+        button { 
+            width: 100%; padding: 15px; border: none; border-radius: 5px; 
+            background-color: var(--tg-theme-button-color, #007bff); 
+            color: var(--tg-theme-button-text-color, #fff); 
+            font-size: 16px; cursor: pointer; margin-top: 20px; 
+        }
+        .status { margin-top: 15px; font-size: 14px; color: var(--tg-theme-hint-color, #666); }
+    </style>
 </head>
 <body>
-<h2>Mini App QR Test</h2>
-<button id="scanBtn">Scan QR</button>
-<p id="result"></p>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<div class="container">
+    <h2>Hai, <span id="userName">Guest</span>!</h2>
+    <p class="status">Scan QR untuk absensi</p>
+    
+    <div id="videoContainer">
+        <video id="video" playsinline></video>
+        <canvas id="canvas"></canvas>
+        <div id="scanLine" style="display:none;"></div>
+    </div>
+
+    <div id="result">Menunggu QR Code...</div>
+</div>
+
+<!-- Library Decoder -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
 <script>
-Telegram.WebApp.ready();
+    // === INISIALISASI TELEGRAM WEB APP ===
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Memperluas tampilan ke full screen
+    tg.ready();  // Menandakan app sudah siap
 
-const btn = document.getElementById("scanBtn");
-const result = document.getElementById("result");
+    // Ambil data user dari Telegram
+    const user = tg.initDataUnsafe.user;
+    const userId = user ? user.id : 'Unknown';
+    const userName = user ? user.first_name : 'Guest';
+    
+    // Tampilkan nama user di UI
+    document.getElementById('userName').innerText = userName;
 
-// URL Web App Google Apps Script
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx2px32bPqXUFVdxOiT_b6ZhGRf5FPO_xbr5Zz2EOuzyQp0v7UmiBnYl0xxNwMjZGTi/exec";
+    // === KONFIGURASI ===
+    const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL'; // Ganti dengan URL Anda
 
-btn.addEventListener("click", () => {
-    if (Telegram.WebApp.showScanQrPopup) {
-        Telegram.WebApp.showScanQrPopup(
-            { text: "Scan QR Code" },
-            function(data) {
-                result.textContent = "QR Code: " + data;
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const resultDiv = document.getElementById('result');
+    const scanLine = document.getElementById('scanLine');
+    
+    let scanning = false;
+    let stream = null;
 
-                // Hantar data ke Google Sheet melalui Apps Script
-                fetch(WEBAPP_URL + "?chat_id=" + Telegram.WebApp.initData.user.id + "&qr=" + encodeURIComponent(data))
-                .then(res => res.text())
-                .then(txt => console.log(txt))
-                .catch(err => console.error(err));
+    // Gunakan MainButton Telegram jika diperlukan, atau auto-start
+    // Di sini kita auto-start kamera saat web dibuka
+    startCamera();
 
-                Telegram.WebApp.closeScanQrPopup();
-            }
-        );
-    } else {
-        alert("QR scanner hanya berfungsi dalam Telegram Mini App");
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            video.srcObject = stream;
+            video.setAttribute("playsinline", true);
+            await video.play();
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            scanLine.style.display = 'block';
+            scanning = true;
+            requestAnimationFrame(scanFrame);
+        } catch (err) {
+            resultDiv.innerText = "Error Kamera: " + err.message;
+        }
     }
-});
+
+    function scanFrame() {
+        if (!scanning) return;
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
+
+            if (code) {
+                handleQRCode(code.data);
+                return;
+            }
+        }
+        requestAnimationFrame(scanFrame);
+    }
+
+    function handleQRCode(qrData) {
+        scanning = false;
+        scanLine.style.display = 'none';
+        
+        // Tampilkan notifikasi di Telegram (bisa di comment jika tidak perlu)
+        // tg.showPopup({ title: 'Ditemukan!', message: 'QR: ' + qrData }); 
+
+        resultDiv.innerHTML = `Mengirim data untuk <strong>${userName}</strong>...`;
+
+        // Kirim Data: QR + User ID + Nama
+        saveToSheet(qrData, userId, userName);
+    }
+
+    async function saveToSheet(qrData, uid, name) {
+        const payload = {
+            qrData: qrData,
+            telegramId: uid,
+            telegramName: name
+        };
+
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            resultDiv.innerHTML = `<span style="color:green">Terima kasih ${name}, data tersimpan!</span>`;
+            
+            // Getar HP (Haptic Feedback) saat sukses
+            tg.HapticFeedback.notificationOccurred('success');
+
+            // Lanjutkan scan setelah 3 detik
+            setTimeout(() => {
+                scanning = true;
+                scanLine.style.display = 'block';
+                requestAnimationFrame(scanFrame);
+                resultDiv.innerHTML = "Menunggu QR Code...";
+            }, 3000);
+
+        } catch (error) {
+            resultDiv.innerText = "Gagal kirim: " + error;
+            tg.HapticFeedback.notificationOccurred('error');
+        }
+    }
 </script>
 </body>
 </html>
-
