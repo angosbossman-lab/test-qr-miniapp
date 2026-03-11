@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>QR Scanner Force Mode</title>
+  <title>QR Scanner & Verification</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
@@ -11,24 +11,40 @@
       color: var(--tg-theme-text-color, #222222);
       margin: 0; padding: 20px;
       display: flex; flex-direction: column;
-      justify-content: center; align-items: center;
+      justify-content: flex-start; align-items: center;
       height: 100vh; text-align: center;
     }
-    .container { width: 90%; max-width: 400px; }
+    .container { width: 90%; max-width: 400px; margin-top: 20px; }
+    
+    /* Styling untuk Butang */
     button {
       width: 100%; padding: 15px; font-size: 16px; font-weight: bold;
       color: white; background-color: var(--tg-theme-button-color, #2481cc);
       border: none; border-radius: 8px; cursor: pointer; margin-top: 20px;
     }
-    button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
+    button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+    /* Styling untuk Kotak Profil (Hasil Carian) */
+    #profile-card {
+      display: none; /* Tersembunyi pada mulanya */
+      margin-top: 20px;
+      padding: 20px;
+      background-color: var(--tg-theme-secondary-bg-color, #f1f1f1);
+      border-radius: 12px;
+      text-align: left;
+      border-left: 5px solid var(--tg-theme-button-color, #2481cc);
     }
+    #profile-card h3 { margin-top: 0; color: var(--tg-theme-text-color); }
+    #profile-card p { margin: 5px 0; font-size: 14px; }
+    #profile-card .label { font-weight: bold; opacity: 0.7; font-size: 12px; }
+
+    /* Styling untuk Log */
     #log-box {
       margin-top: 20px; padding: 10px;
       background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
-      border-radius: 8px; font-size: 12px; text-align: left;
-      word-break: break-all; min-height: 100px; max-height: 300px; overflow-y: auto;
+      border-radius: 8px; font-size: 11px; text-align: left;
+      word-break: break-all; max-height: 150px; overflow-y: auto;
+      opacity: 0.7;
     }
     .error { color: red; font-weight: bold; }
     .success { color: green; font-weight: bold; }
@@ -37,17 +53,24 @@
 <body>
 
   <div class="container">
-    <h3>🛠️ Force Scan Mode</h3>
-    <button id="startScan">MULA IMBAS QR</button>
+    <h3>🔍 Pengesahan Peserta</h3>
+    <button id="startScan">IMBAS QR</button>
     
+    <!-- Area untuk Papar Profil -->
+    <div id="profile-card">
+      <h3 id="card-title">Maklumat Peserta</h3>
+      <p><span class="label">NO MATRIK:</span><br><span id="res-matrik">-</span></p>
+      <p><span class="label">NAMA:</span><br><span id="res-nama">-</span></p>
+      <p><span class="label">BAHAGIAN:</span><br><span id="res-bahagian">-</span></p>
+    </div>
+
     <div id="log-box">
-      Sistem memulakan...<br>
+      Sistem sedia.<br>
     </div>
   </div>
 
   <script>
     // === KONFIGURASI ===
-    // GANTIKAN INI DENGAN URL GOOGLE APPS SCRIPT ANDA
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyGFF9Mh9bz_SylU3cbbaS0GK-rwGSTDv07tc5D1ySMh5RDESXavu5MJosg_HbOxOn6/exec'; 
 
     function log(msg, type) {
@@ -58,42 +81,64 @@
       if(type === 'success') colorClass = 'success';
       
       box.innerHTML += '<div class="' + colorClass + '">[' + time + '] ' + msg + '</div>';
-      // Auto scroll ke bawah
       box.scrollTop = box.scrollHeight;
       console.log(msg);
     }
 
-    // Fungsi untuk hantar data ke Sheet
-    function saveToSheet(qrData, userId, userName) {
-      log('Menghubungi server...');
+    // Fungsi untuk Semak Data dengan Server
+    async function verifyWithSheet(qrData) {
+      log('Menyambung ke server...');
 
-      var dataToSend = {
-        qrData: qrData,
-        telegramId: userId,
-        telegramName: userName
-      };
+      try {
+        // Kita buang 'no-cors' supaya boleh terima jawapan dari server
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ qrData: qrData })
+        });
 
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSend)
-      })
-      .then(() => {
-        log('✅ Data berjaya dihantar ke Sheet!', 'success');
-        // Getar telefon sebagai tanda berjaya (jika ada sokongan)
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
-            window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+        const result = await response.json();
+
+        if (result.status === 'found') {
+          log('✅ Data Sah: ' + result.details.nama, 'success');
+          showProfile(result.details);
+          
+          // Getar telefon (Success)
+          if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
+              window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+          }
+        } else {
+          log('❌ Data Tidak Sah: ' + result.message, 'error');
+          hideProfile();
+          
+          // Getar telefon (Error)
+          if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
+              window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+          }
         }
-      })
-      .catch((error) => {
-        log('❌ Gagal hubungi server: ' + error.message, 'error');
-      });
+
+      } catch (error) {
+        log('❌ Ralat Sambungan: ' + error.message, 'error');
+      }
     }
 
+    // Fungsi Papar Profil
+    function showProfile(data) {
+      document.getElementById('res-matrik').innerText = data.noMatrik;
+      document.getElementById('res-nama').innerText = data.nama;
+      document.getElementById('res-bahagian').innerText = data.bahagian;
+      document.getElementById('profile-card').style.display = 'block';
+      document.getElementById('card-title').innerText = "✅ Pengesahan Berjaya";
+      document.getElementById('profile-card').style.borderLeftColor = "green";
+    }
+
+    // Fungsi Sembunyikan Profil
+    function hideProfile() {
+      document.getElementById('profile-card').style.display = 'none';
+    }
+
+    // --- LOGIK UTAMA TELEGRAM ---
     try {
-      log('Mencari Telegram objek...');
-      
       if (!window.Telegram || !window.Telegram.WebApp) {
         throw new Error('GAGAL: Bukan dalam aplikasi Telegram.');
       }
@@ -102,42 +147,20 @@
       tg.ready();
       tg.expand();
       
-      log('Telegram dikesan: ' + tg.platform);
-      
-      // Dapatkan info user
-      var user = tg.initDataUnsafe.user;
-      var userId = user ? user.id : 'Unknown';
-      var userName = user ? user.first_name : 'Guest';
-      
-      log('User: ' + userName + ' (ID: ' + userId + ')');
-
       var btn = document.getElementById('startScan');
 
       if (typeof tg.showScanQrPopup === 'function') {
-        log('Status: Ready. Tekan butang untuk imbas.', 'success');
-        
         btn.onclick = function() {
-          log('Meminta akses kamera...');
-          
-          try {
-            tg.showScanQrPopup({ text: 'Imbas Kod QR' }, function(result) {
-              log('QR Dikesan: ' + result);
-              tg.closeScanQrPopup(); // Tutup popup scanner
-              
-              // Hantar data ke Sheet
-              saveToSheet(result, userId, userName);
-            });
-          } catch (e) {
-            log('RALAT masa buka kamera: ' + e.message, 'error');
-          }
+          hideProfile(); // Reset paparan
+          tg.showScanQrPopup({ text: 'Imbas Kod QR Peserta' }, function(result) {
+            tg.closeScanQrPopup();
+            verifyWithSheet(result); // Hantar data untuk disemak
+          });
         };
       } else {
-        log('RALAT: Telefon ini tidak support QR Scanner.', 'error');
-        log('Kemungkinan versi Telegram terlalu lama.');
+        log('Ralat: Peranti tidak support scanner.', 'error');
         btn.disabled = true;
-        btn.style.backgroundColor = '#ccc';
       }
-
     } catch (err) {
       log(err.message, 'error');
     }
