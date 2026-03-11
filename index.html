@@ -2,97 +2,122 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>QR Scanner & Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Pengesahan QR</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
       background-color: var(--tg-theme-bg-color, #ffffff);
       color: var(--tg-theme-text-color, #222222);
       margin: 0; padding: 20px;
       display: flex; flex-direction: column;
-      justify-content: flex-start; align-items: center;
-      height: 100vh; text-align: center;
+      align-items: center;
     }
-    .container { width: 90%; max-width: 400px; margin-top: 20px; }
+    .container { width: 100%; max-width: 400px; }
     
-    /* Styling untuk Butang */
     button {
       width: 100%; padding: 15px; font-size: 16px; font-weight: bold;
       color: white; background-color: var(--tg-theme-button-color, #2481cc);
-      border: none; border-radius: 8px; cursor: pointer; margin-top: 20px;
+      border: none; border-radius: 10px; cursor: pointer; margin-top: 20px;
+      transition: opacity 0.2s;
     }
-    button:disabled { background-color: #ccc; cursor: not-allowed; }
+    button:active { opacity: 0.8; }
+    button:disabled { background-color: #cccccc; cursor: not-allowed; }
 
-    /* Styling untuk Kotak Profil (Hasil Carian) */
+    /* Card Profil */
     #profile-card {
-      display: none; /* Tersembunyi pada mulanya */
+      display: none;
       margin-top: 20px;
       padding: 20px;
-      background-color: var(--tg-theme-secondary-bg-color, #f1f1f1);
+      background-color: var(--tg-theme-secondary-bg-color, #f4f4f4);
       border-radius: 12px;
       text-align: left;
-      border-left: 5px solid var(--tg-theme-button-color, #2481cc);
+      width: 100%;
+      box-sizing: border-box;
+      border-left: 5px solid #4CAF50;
     }
-    #profile-card h3 { margin-top: 0; color: var(--tg-theme-text-color); }
-    #profile-card p { margin: 5px 0; font-size: 14px; }
-    #profile-card .label { font-weight: bold; opacity: 0.7; font-size: 12px; }
-
-    /* Styling untuk Log */
-    #log-box {
-      margin-top: 20px; padding: 10px;
-      background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
-      border-radius: 8px; font-size: 11px; text-align: left;
-      word-break: break-all; max-height: 150px; overflow-y: auto;
-      opacity: 0.7;
+    #profile-card h3 { margin-top: 0; margin-bottom: 15px; font-size: 18px; }
+    #profile-card p { margin: 5px 0; font-size: 15px; }
+    #profile-card .label { font-size: 12px; opacity: 0.6; display: block; margin-top: 10px; }
+    
+    /* Status Box */
+    #status-box {
+      margin-top: 20px; text-align: center;
+      font-size: 14px; color: var(--tg-theme-hint-color, #999);
     }
-    .error { color: red; font-weight: bold; }
-    .success { color: green; font-weight: bold; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <h3>🔍 Pengesahan Peserta</h3>
+    
+    <div id="status-box">Tekan butang di bawah untuk imbas.</div>
+    
     <button id="startScan">IMBAS QR</button>
     
-    <!-- Area untuk Papar Profil -->
     <div id="profile-card">
       <h3 id="card-title">Maklumat Peserta</h3>
-      <p><span class="label">NO MATRIK:</span><br><span id="res-matrik">-</span></p>
-      <p><span class="label">NAMA:</span><br><span id="res-nama">-</span></p>
-      <p><span class="label">BAHAGIAN:</span><br><span id="res-bahagian">-</span></p>
-    </div>
-
-    <div id="log-box">
-      Sistem sedia.<br>
+      <span class="label">NO MATRIK</span>
+      <p id="res-matrik"><b>-</b></p>
+      
+      <span class="label">NAMA</span>
+      <p id="res-nama"><b>-</b></p>
+      
+      <span class="label">BAHAGIAN</span>
+      <p id="res-bahagian"><b>-</b></p>
     </div>
   </div>
 
   <script>
-    // === KONFIGURASI ===
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8dIJ_I2-dr8ZaJPNlosiCjLo2HmnEZTmuBvUOuSCM8NXv2tBkVIne0ccN8BSv1Mb3/exec'; 
+    // =====================================
+    // PENTING: TUKAR URL DI BAWAH INI
+    // =====================================
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHx2h0emqzLSjtNN0JMv69RMLm4CbckbwqQHkIjeCB4nDIh_bPOpACl7uthAh1IBHh/exec';
+    // =====================================
 
-    function log(msg, type) {
-      var box = document.getElementById('log-box');
-      var time = new Date().toLocaleTimeString();
-      var colorClass = '';
-      if(type === 'error') colorClass = 'error';
-      if(type === 'success') colorClass = 'success';
-      
-      box.innerHTML += '<div class="' + colorClass + '">[' + time + '] ' + msg + '</div>';
-      box.scrollTop = box.scrollHeight;
-      console.log(msg);
+    const statusBox = document.getElementById('status-box');
+    const startBtn = document.getElementById('startScan');
+    const profileCard = document.getElementById('profile-card');
+
+    // Check jika Telegram objek wujud
+    if (!window.Telegram || !window.Telegram.WebApp) {
+      statusBox.innerHTML = "⚠️ <b>Ralat:</b> Sila buka melalui aplikasi Telegram.";
+      startBtn.disabled = true;
+      throw new Error("Bukan Telegram");
     }
-        // Fungsi untuk Semak Data dengan Server (Versi Debug)
-    async function verifyWithSheet(qrData) {
-      log('Menyambung ke server...');
+
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    // Semak jika URL masih default
+    if (SCRIPT_URL === 'MASUKKAN_URL_WEB_APP_ANDA_DISINI' || SCRIPT_URL === '') {
+      statusBox.innerHTML = "⚠️ <b>Ralat Konfigurasi:</b> URL Script masih kosong dalam kod.";
+      startBtn.disabled = true;
+    }
+
+    startBtn.onclick = function() {
+      // Reset UI
+      profileCard.style.display = 'none';
+      statusBox.innerText = "Meminta akses kamera...";
       
-      // Semak jika URL kosong
-      if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbz8dIJ_I2-dr8ZaJPNlosiCjLo2HmnEZTmuBvUOuSCM8NXv2tBkVIne0ccN8BSv1Mb3/exec' || !SCRIPT_URL) {
-        log('❌ RALAT: URL Script masih kosong!', 'error');
-        return;
+      if (typeof tg.showScanQrPopup === 'function') {
+        tg.showScanQrPopup({ text: 'Imbas Kod QR Peserta' }, function(result) {
+          tg.closeScanQrPopup();
+          if (result) {
+            verifyWithSheet(result);
+          }
+        });
+      } else {
+        statusBox.innerText = "⚠️ Peranti ini tidak menyokong scanner (versi Telegram lama).";
       }
+    };
+
+    async function verifyWithSheet(qrData) {
+      statusBox.innerText = "Menyambung ke server...";
+      startBtn.disabled = true;
 
       try {
         const response = await fetch(SCRIPT_URL, {
@@ -101,78 +126,43 @@
           body: JSON.stringify({ qrData: qrData })
         });
 
-        // Semak status HTTP (200 = OK, lain = Error)
         if (!response.ok) {
-          log('❌ Server Error: Status ' + response.status, 'error');
-          return;
+          throw new Error('Server respond dengan status ' + response.status);
         }
 
         const result = await response.json();
 
         if (result.status === 'found') {
-          log('✅ Data Sah: ' + result.details.nama, 'success');
+          // SUCCESS
+          statusBox.innerText = "✅ Pengesahan berjaya.";
           showProfile(result.details);
-          if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
-              window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-          }
+          tg.HapticFeedback.notificationOccurred('success');
         } else if (result.status === 'error') {
-          // Error dari script (catch block)
-          log('❌ Script Error: ' + result.message, 'error');
+          // SERVER ERROR
+          statusBox.innerHTML = "<span style='color:red'>❌ Ralat Server: " + result.message + "</span>";
         } else {
-          log('❌ Data Tidak Sah: ' + result.message, 'error');
-          hideProfile();
+          // NOT FOUND
+          statusBox.innerHTML = "<span style='color:orange'>⚠️ " + result.message + "</span>";
+          tg.HapticFeedback.notificationOccurred('warning');
         }
 
       } catch (error) {
-        // Inilah bahagian yang menyebabkan "Failed to fetch"
-        log('❌ Ralat Rangkaian: ' + error.message, 'error');
-        log('Cuba check: 1) URL betul? 2) Deploy version baru? 3) Akses Anyone?', 'error');
+        statusBox.innerHTML = "<span style='color:red'>❌ Gagal sambung: " + error.message + "</span>";
+      } finally {
+        startBtn.disabled = false;
       }
     }
-    // Fungsi Papar Profil
+
     function showProfile(data) {
       document.getElementById('res-matrik').innerText = data.noMatrik;
       document.getElementById('res-nama').innerText = data.nama;
       document.getElementById('res-bahagian').innerText = data.bahagian;
-      document.getElementById('profile-card').style.display = 'block';
-      document.getElementById('card-title').innerText = "✅ Pengesahan Berjaya";
-      document.getElementById('profile-card').style.borderLeftColor = "green";
-    }
-
-    // Fungsi Sembunyikan Profil
-    function hideProfile() {
-      document.getElementById('profile-card').style.display = 'none';
-    }
-
-    // --- LOGIK UTAMA TELEGRAM ---
-    try {
-      if (!window.Telegram || !window.Telegram.WebApp) {
-        throw new Error('GAGAL: Bukan dalam aplikasi Telegram.');
-      }
-
-      var tg = window.Telegram.WebApp;
-      tg.ready();
-      tg.expand();
       
-      var btn = document.getElementById('startScan');
-
-      if (typeof tg.showScanQrPopup === 'function') {
-        btn.onclick = function() {
-          hideProfile(); // Reset paparan
-          tg.showScanQrPopup({ text: 'Imbas Kod QR Peserta' }, function(result) {
-            tg.closeScanQrPopup();
-            verifyWithSheet(result); // Hantar data untuk disemak
-          });
-        };
-      } else {
-        log('Ralat: Peranti tidak support scanner.', 'error');
-        btn.disabled = true;
-      }
-    } catch (err) {
-      log(err.message, 'error');
+      document.getElementById('card-title').innerText = "✅ Pengesahan Berjaya";
+      document.getElementById('card-title').style.color = "#4CAF50";
+      
+      profileCard.style.display = 'block';
     }
   </script>
 </body>
 </html>
-
-
