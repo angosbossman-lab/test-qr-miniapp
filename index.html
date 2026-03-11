@@ -84,44 +84,51 @@
       box.scrollTop = box.scrollHeight;
       console.log(msg);
     }
-
-    // Fungsi untuk Semak Data dengan Server
+        // Fungsi untuk Semak Data dengan Server (Versi Debug)
     async function verifyWithSheet(qrData) {
       log('Menyambung ke server...');
+      
+      // Semak jika URL kosong
+      if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbz8dIJ_I2-dr8ZaJPNlosiCjLo2HmnEZTmuBvUOuSCM8NXv2tBkVIne0ccN8BSv1Mb3/exec' || !SCRIPT_URL) {
+        log('❌ RALAT: URL Script masih kosong!', 'error');
+        return;
+      }
 
       try {
-        // Kita buang 'no-cors' supaya boleh terima jawapan dari server
         const response = await fetch(SCRIPT_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ qrData: qrData })
         });
 
+        // Semak status HTTP (200 = OK, lain = Error)
+        if (!response.ok) {
+          log('❌ Server Error: Status ' + response.status, 'error');
+          return;
+        }
+
         const result = await response.json();
 
         if (result.status === 'found') {
           log('✅ Data Sah: ' + result.details.nama, 'success');
           showProfile(result.details);
-          
-          // Getar telefon (Success)
           if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
               window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
           }
+        } else if (result.status === 'error') {
+          // Error dari script (catch block)
+          log('❌ Script Error: ' + result.message, 'error');
         } else {
           log('❌ Data Tidak Sah: ' + result.message, 'error');
           hideProfile();
-          
-          // Getar telefon (Error)
-          if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
-              window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-          }
         }
 
       } catch (error) {
-        log('❌ Ralat Sambungan: ' + error.message, 'error');
+        // Inilah bahagian yang menyebabkan "Failed to fetch"
+        log('❌ Ralat Rangkaian: ' + error.message, 'error');
+        log('Cuba check: 1) URL betul? 2) Deploy version baru? 3) Akses Anyone?', 'error');
       }
     }
-
     // Fungsi Papar Profil
     function showProfile(data) {
       document.getElementById('res-matrik').innerText = data.noMatrik;
@@ -167,3 +174,4 @@
   </script>
 </body>
 </html>
+
