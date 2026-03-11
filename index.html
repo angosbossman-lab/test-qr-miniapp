@@ -7,186 +7,79 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    /* ==============================================
-       RESET & BASE (BETULAN SCROLL)
-    ============================================== */
-    html, body {
-      margin: 0; padding: 0;
-      width: 100%;
-      overflow-x: hidden; /* HALANG SCROLL KIRI KANAN */
-      scroll-behavior: smooth;
-    }
-
     :root {
-      --primary: #6C63FF;
-      --accent: #FF6584;
-      --success: #4CAF50;
-      --dark: #2D3436;
-      --glass: rgba(255, 255, 255, 0.85);
-      --glass-border: rgba(255, 255, 255, 0.5);
-      --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.1);
+      --primary: #6C63FF; --accent: #FF6584; --success: #4CAF50; --dark: #2D3436;
+      --glass: rgba(255,255,255,0.85); --glass-border: rgba(255,255,255,0.5);
+      --shadow-soft: 0 8px 32px rgba(0,0,0,0.1);
     }
-
+    html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; scroll-behavior: smooth; }
     body {
-      font-family: 'Outfit', sans-serif;
-      min-height: 100vh;
-      display: flex; flex-direction: column;
-      align-items: center;
-      background: linear-gradient(135deg, #FDFBF7 0%, #E3F2FD 50%, #F3E5F5 100%);
-      background-attachment: fixed;
-      color: var(--dark);
-      -webkit-font-smoothing: antialiased;
-      position: relative; /* Penting untuk z-index */
+      font-family: 'Outfit', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+      background: linear-gradient(135deg, #FDFBF7 0%, #E3F2FD 50%, #F3E5F5 100%); background-attachment: fixed;
+      color: var(--dark); -webkit-font-smoothing: antialiased; position: relative;
     }
-
-    /* Background Shapes - Added pointer-events: none */
-    .bg-shape {
-      position: fixed; border-radius: 50%; filter: blur(80px); z-index: -1;
-      pointer-events: none; /* Supaya tak block scroll */
-    }
+    .bg-shape { position: fixed; border-radius: 50%; filter: blur(80px); z-index: -1; pointer-events: none; }
     .shape-1 { width: 300px; height: 300px; background: #D1C4E9; top: -50px; left: -50px; opacity: 0.6; }
     .shape-2 { width: 400px; height: 400px; background: #BBDEFB; bottom: -50px; right: -50px; opacity: 0.6; }
 
-    .app-container {
-      width: 100%; max-width: 450px;
-      padding: 25px; padding-top: 30px;
-      box-sizing: border-box;
-      display: flex; flex-direction: column;
-      position: relative; /* Anchor */
-    }
+    .app-container { width: 100%; max-width: 450px; padding: 25px; padding-top: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
 
-    /* ==============================================
-       HEADER & BANNER
-    ============================================== */
-    .header { 
-      text-align: center; 
-      margin-bottom: 20px; 
-      animation: float 3s ease-in-out infinite;
-      width: 100%;
-    }
-    
+    .header { text-align: center; margin-bottom: 20px; animation: float 3s ease-in-out infinite; width: 100%; }
     @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
 
-    /* BANNER FIX */
     .banner-frame {
-      width: 100%; /* Tetapkan lebar penuh */
-      max-width: 320px; /* Hadkan lebar maksima */
-      margin: 0 auto 20px auto; /* Centerkan */
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      border-radius: 20px; 
-      padding: 20px;
-      box-shadow: 0 15px 35px rgba(108, 99, 255, 0.3);
-      display: flex; align-items: center; justify-content: center; gap: 15px;
-      position: relative; overflow: hidden;
-      box-sizing: border-box; /* Pastikan padding tak melebar kan div */
+      width: 100%; max-width: 320px; margin: 0 auto 20px auto;
+      background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 20px; padding: 20px;
+      box-shadow: 0 15px 35px rgba(108,99,255,0.3); display: flex; align-items: center; justify-content: center; gap: 15px;
+      position: relative; overflow: hidden; box-sizing: border-box;
     }
-    
-    .banner-frame::after {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
-      background-size: 10px 10px; opacity: 0.5;
-    }
-
-    .banner-logo {
-      width: 50px; height: 50px; flex-shrink: 0; /* Jangan kecilkan */
-      background: rgba(255,255,255,0.2); border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      position: relative; z-index: 1; backdrop-filter: blur(5px);
-    }
-
-    .banner-text { 
-      text-align: left; 
-      position: relative; z-index: 1; 
-      flex-grow: 1; /* Biar text ambil ruang saki baki */
-    }
-    
-    .banner-title { font-size: 28px; font-weight: 800; color: white; margin: 0; line-height: 1; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .banner-frame::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 10px 10px; opacity: 0.5; }
+    .banner-logo { width: 50px; height: 50px; flex-shrink: 0; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
+    .banner-text { text-align: left; position: relative; z-index: 1; flex-grow: 1; }
+    .banner-title { font-size: 28px; font-weight: 800; color: white; margin: 0; line-height: 1; letter-spacing: 1px; }
     .banner-subtitle { font-size: 12px; color: rgba(255,255,255,0.9); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
-
     .subtitle { font-size: 16px; color: #636E72; margin-top: 5px; font-weight: 400; line-height: 1.4; }
 
-    /* ==============================================
-       DEBUG & BUTTONS
-    ============================================== */
-    .debug-container {
-      display: none; justify-content: center; align-items: center;
-      margin-bottom: 10px; font-size: 14px; color: #636E72;
-    }
+    .debug-container { display: none; justify-content: center; align-items: center; margin-bottom: 10px; font-size: 14px; color: #636E72; }
     .switch { position: relative; display: inline-block; width: 50px; height: 26px; margin-left: 10px; }
     .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #ccc; transition: .3s; border-radius: 34px;
-    }
-    .slider:before {
-      position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
-      background-color: white; transition: .3s; border-radius: 50%;
-    }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
     input:checked + .slider { background-color: var(--success); }
     input:checked + .slider:before { transform: translateX(24px); }
 
     .btn-main {
-      width: 100%; padding: 18px; font-size: 18px; font-weight: 700;
-      color: white; background: var(--primary);
-      border: none; border-radius: 16px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 12px;
-      box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
-      transition: all 0.2s ease; box-sizing: border-box;
+      width: 100%; padding: 18px; font-size: 18px; font-weight: 700; color: white; background: var(--primary);
+      border: none; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px;
+      box-shadow: 0 10px 20px rgba(108,99,255,0.3); transition: all 0.2s ease; box-sizing: border-box;
     }
     .btn-main:active { transform: scale(0.96); }
     .btn-main:disabled { background: #B2BEC3; box-shadow: none; cursor: not-allowed; }
-
-    .btn-collect {
-      background: var(--success);
-      box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
-      margin-top: 20px;
-      display: none;
-    }
+    .btn-collect { background: var(--success); box-shadow: 0 10px 20px rgba(76,175,80,0.3); margin-top: 20px; display: none; }
 
     #list-container { width: 100%; margin-top: 20px; }
 
-    /* ==============================================
-       CARDS & ITEMS
-    ============================================== */
     .item-card {
       background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px;
-      margin-bottom: 15px; box-shadow: var(--shadow-soft); position: relative; overflow: hidden;
-      animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-sizing: border-box;
+      border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 15px;
+      box-shadow: var(--shadow-soft); position: relative; overflow: hidden;
+      animation: slideIn 0.3s ease-out; box-sizing: border-box;
     }
-    
-    .item-card::before {
-      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-      width: 6px; background: var(--accent); transition: background 0.3s ease;
-    }
-
+    .item-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--accent); transition: background 0.3s ease; }
     .item-card.success-card::before { background: var(--success); }
-    .item-card.success-card { border-color: rgba(76, 175, 80, 0.3); }
+    .item-card.success-card { border-color: rgba(76,175,80,0.3); }
 
     .card-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-
     .status-pill {
-      background: rgba(255, 101, 132, 0.15); color: var(--accent);
-      padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 700;
-      text-transform: uppercase; display: flex; align-items: center; gap: 6px;
-      transition: all 0.3s ease;
+      background: rgba(255,101,132,0.15); color: var(--accent); padding: 6px 12px; border-radius: 50px; font-size: 12px;
+      font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 6px; transition: all 0.3s ease;
     }
-
-    .status-pill.success-pill { background: rgba(76, 175, 80, 0.15); color: var(--success); }
+    .status-pill.success-pill { background: rgba(76,175,80,0.15); color: var(--success); }
 
     .item-name { font-size: 20px; font-weight: 800; color: var(--dark); margin: 5px 0; }
     .item-meta { font-size: 15px; color: #636E72; display: flex; align-items: center; gap: 8px; margin-top: 5px; }
-
     .pixel-icon { width: 24px; height: 24px; display: block; }
     
-    .debug-box {
-      margin-top: 15px; padding: 15px;
-      background: rgba(0,0,0,0.05); border-radius: 10px; text-align: left;
-      font-size: 12px; border: 1px dashed #B2BEC3; box-sizing: border-box;
-    }
-    .debug-box b { color: var(--primary); }
-
     @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
@@ -200,12 +93,7 @@
     <div class="header">
       <div class="banner-frame">
         <div class="banner-logo">
-          <svg width="32" height="32" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="4" width="14" height="10" fill="white"/>
-            <rect x="3" y="6" width="10" height="2" fill="#6C63FF"/>
-            <rect x="1" y="2" width="14" height="2" fill="white"/>
-            <rect x="7" y="8" width="2" height="6" fill="#FF6584"/>
-          </svg>
+          <svg width="32" height="32" viewBox="0 0 16 16" fill="none"><rect x="1" y="4" width="14" height="10" fill="white"/><rect x="3" y="6" width="10" height="2" fill="#6C63FF"/><rect x="1" y="2" width="14" height="2" fill="white"/><rect x="7" y="8" width="2" height="6" fill="#FF6584"/></svg>
         </div>
         <div class="banner-text">
           <h1 class="banner-title">PARCELHUB</h1>
@@ -224,35 +112,21 @@
     </div>
 
     <button id="scanBtn" class="btn-main" onclick="openScanner()">
-      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="1" y="5" width="14" height="9" rx="2" fill="white"/>
-        <rect x="4" y="3" width="8" height="2" fill="white"/>
-        <rect x="5" y="7" width="6" height="5" rx="3" fill="#6C63FF"/>
-        <rect x="7" y="9" width="2" height="2" fill="white"/>
-      </svg>
+      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="5" width="14" height="9" rx="2" fill="white"/><rect x="4" y="3" width="8" height="2" fill="white"/><rect x="5" y="7" width="6" height="5" rx="3" fill="#6C63FF"/><rect x="7" y="9" width="2" height="2" fill="white"/></svg>
       IMBAS QR
     </button>
 
     <div id="list-container"></div>
 
     <button id="collectBtn" class="btn-main btn-collect" onclick="updateStatus()">
-      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="9" width="3" height="3" fill="white"/>
-        <rect x="5" y="12" width="3" height="2" fill="white"/>
-        <rect x="8" y="7" width="3" height="3" fill="white"/>
-        <rect x="11" y="2" width="3" height="5" fill="white"/>
-      </svg>
+      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="9" width="3" height="3" fill="white"/><rect x="5" y="12" width="3" height="2" fill="white"/><rect x="8" y="7" width="3" height="3" fill="white"/><rect x="11" y="2" width="3" height="5" fill="white"/></svg>
       COLLECTED
     </button>
 
   </div>
 
   <script>
-    // ==============================================
-    // KONFIGURASI
-    // ==============================================
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmdsEunQEEkPWfbC4mxKKMox0GgTLHf1ChXzsIbJCl3KNaZAU_wB1MBN7d_xC__H0/exec';
-    
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQ0Gp5phSpAsPhvoZROqiWU74_qFK73Niobe6Y6DOkg-t01EgGUqqBUDLBZjt9NQ/exec';
     const subtitleText = document.getElementById('subtitle-text');
     const scanBtn = document.getElementById('scanBtn');
     const listContainer = document.getElementById('list-container');
@@ -265,9 +139,6 @@
     var isDebugMode = false;
     var currentUserId = null;
 
-    // ==============================================
-    // TELEGRAM SETUP
-    // ==============================================
     if (!window.Telegram || !window.Telegram.WebApp) {
       alert("Buka dalam Telegram.");
       throw new Error("Bukan Telegram");
@@ -277,18 +148,14 @@
     tg.ready();
     tg.expand();
     
-    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-      currentUserId = tg.initDataUnsafe.user.id;
-    }
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) currentUserId = tg.initDataUnsafe.user.id;
 
     if (!SCRIPT_URL || SCRIPT_URL === 'MASUKKAN_URL_WEB_APP_ANDA_DISINI') {
       subtitleText.innerHTML = "⚠️ <b>RALAT:</b> URL Script belum diset.";
       scanBtn.disabled = true;
     }
 
-    function toggleDebugMode() {
-      isDebugMode = debugToggle.checked;
-    }
+    function toggleDebugMode() { isDebugMode = debugToggle.checked; }
 
     function openScanner() {
       listContainer.innerHTML = '';
@@ -313,9 +180,7 @@
       subtitleText.innerText = "Memproses data...";
 
       try {
-        let url = SCRIPT_URL + '?qrData=' + encodeURIComponent(qrData);
-        if (currentUserId) url += '&userId=' + currentUserId;
-
+        let url = SCRIPT_URL + '?qrData=' + encodeURIComponent(qrData) + (currentUserId ? '&userId=' + currentUserId : '');
         const res = await fetch(url);
         const data = await res.json();
 
@@ -324,36 +189,22 @@
           subtitleText.innerText = `Hi ${data.staffName}!`;
         } else {
           debugContainer.style.display = 'none';
+          subtitleText.innerText = "Selamat Datang";
         }
 
         if (data.status === 'found_pending') {
-          const count = data.list.length;
-          subtitleText.innerText += ` Dijumpai ${count} item.`;
-          
+          subtitleText.innerText += ` Dijumpai ${data.list.length} item.`;
           rowsToUpdate = data.list.map(item => item.rowIndex);
           currentItemList = data.list;
           renderList(currentItemList, false);
-          
-          if (data.isStaff) {
-            collectBtn.style.display = 'flex';
-            tg.HapticFeedback.notificationOccurred('warning');
-          }
-          
+          if (data.isStaff) collectBtn.style.display = 'flex';
+          tg.HapticFeedback.notificationOccurred('warning');
         } else if (data.status === 'not_found') {
           subtitleText.innerText += " Tiada item pending.";
-          
-          if (isDebugMode && data.debug_info) {
-             let debugHtml = "<div class='debug-box'>";
-             debugHtml += "<b>Server Cari:</b> " + data.debug_info.server_date + "<br>";
-             debugHtml += "<b>Matrik:</b> " + data.debug_info.scan_matrik + "<br>";
-             debugHtml += "<b>Data Row 1:</b> " + data.debug_info.first_row_data;
-             debugHtml += "</div>";
-             subtitleText.innerHTML += debugHtml;
-          }
+          if (isDebugMode && data.debug_info) subtitleText.innerHTML += `<div class='debug-box'>Debug: ${data.debug_info}</div>`;
         } else {
           subtitleText.innerText = "❌ " + data.message;
         }
-
       } catch (err) {
         subtitleText.innerText = "❌ Ralat: " + err.message;
       } finally {
@@ -367,10 +218,7 @@
       subtitleText.innerText = "Menyimpan...";
 
       try {
-        var rowsParam = rowsToUpdate.join(',');
-        let url = SCRIPT_URL + '?action=update&rows=' + rowsParam;
-        if (currentUserId) url += '&userId=' + currentUserId;
-
+        let url = SCRIPT_URL + '?action=update&rows=' + rowsToUpdate.join(',') + (currentUserId ? '&userId=' + currentUserId : '');
         const res = await fetch(url);
         const data = await res.json();
 
@@ -390,37 +238,34 @@
       }
     }
 
+    // Optimize: Guna DocumentFragment
     function renderList(items, isSuccess) {
-      listContainer.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+      
       items.forEach((item, index) => {
         const card = document.createElement('div');
         card.className = isSuccess ? 'item-card success-card' : 'item-card';
         
         var statusText = isSuccess ? "COLLECTED" : "PENDING";
         var pillClass = isSuccess ? "status-pill success-pill" : "status-pill";
-        
         var statusIcon = isSuccess 
           ? `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="9" width="3" height="3" fill="currentColor"/><rect x="5" y="12" width="3" height="2" fill="currentColor"/><rect x="8" y="7" width="3" height="3" fill="currentColor"/><rect x="11" y="2" width="3" height="5" fill="currentColor"/></svg>` 
           : `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="3" y="1" width="10" height="14" rx="5" stroke="currentColor" stroke-width="2" fill="none"/><rect x="7" y="4" width="2" height="4" fill="currentColor"/></svg>`;
 
         card.innerHTML = `
-          <div class="card-row">
-            <div class="${pillClass}">${statusIcon} ${statusText}</div>
-          </div>
+          <div class="card-row"><div class="${pillClass}">${statusIcon} ${statusText}</div></div>
           <div class="item-name">${item.namaItem}</div>
           <div class="item-meta">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-               <rect x="6" y="2" width="4" height="4" fill="#636E72"/>
-               <rect x="4" y="8" width="8" height="2" fill="#636E72"/>
-               <rect x="3" y="10" width="2" height="4" fill="#636E72"/>
-               <rect x="11" y="10" width="2" height="4" fill="#636E72"/>
-            </svg>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="6" y="2" width="4" height="4" fill="#636E72"/><rect x="4" y="8" width="8" height="2" fill="#636E72"/><rect x="3" y="10" width="2" height="4" fill="#636E72"/><rect x="11" y="10" width="2" height="4" fill="#636E72"/></svg>
             ${item.nama}
           </div>
           <div class="item-meta" style="font-size: 13px; opacity: 0.8;">ID: ${item.noMatrik}</div>
         `;
-        listContainer.appendChild(card);
+        fragment.appendChild(card);
       });
+      
+      listContainer.innerHTML = ''; // Kosongkan sekali
+      listContainer.appendChild(fragment); // Tambah semua sekali gus
     }
 
     function setLoading(isLoading) {
