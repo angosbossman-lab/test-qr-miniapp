@@ -1,35 +1,108 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Test QR Scanner</title>
+  <meta charset="UTF-8">
+  <title>QR Scanner Force Mode</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: var(--tg-theme-bg-color, #ffffff);
+      color: var(--tg-theme-text-color, #222222);
+      margin: 0; padding: 20px;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      height: 100vh; text-align: center;
+    }
+    .container { width: 90%; max-width: 400px; }
+    button {
+      width: 100%; padding: 15px; font-size: 16px; font-weight: bold;
+      color: white; background-color: var(--tg-theme-button-color, #2481cc);
+      border: none; border-radius: 8px; cursor: pointer; margin-top: 20px;
+    }
+    #log-box {
+      margin-top: 20px; padding: 10px;
+      background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      border-radius: 8px; font-size: 12px; text-align: left;
+      word-break: break-all; min-height: 100px;
+    }
+    .error { color: red; font-weight: bold; }
+    .success { color: green; font-weight: bold; }
+  </style>
 </head>
 <body>
-<h2>Mini App QR Test</h2>
-<button id="scanBtn">Scan QR</button>
-<p id="result"></p>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
-  // Pastikan Web App siap sebelum kita panggil QR
-  Telegram.WebApp.ready();
+  <div class="container">
+    <h3>🛠️ Force Scan Mode</h3>
+    <button id="startScan">MULA IMBAS QR</button>
+    
+    <div id="log-box">
+      Sistem memulakan...<br>
+    </div>
+  </div>
 
-  const btn = document.getElementById("scanBtn");
-  const result = document.getElementById("result");
+  <script>
+    function log(msg, type) {
+      var box = document.getElementById('log-box');
+      var time = new Date().toLocaleTimeString();
+      var colorClass = '';
+      if(type === 'error') colorClass = 'error';
+      if(type === 'success') colorClass = 'success';
+      
+      box.innerHTML += '<div class="' + colorClass + '">[' + time + '] ' + msg + '</div>';
+      console.log(msg);
+    }
 
-  btn.addEventListener("click", () => {
-      if (Telegram.WebApp.showScanQrPopup) {
-          Telegram.WebApp.showScanQrPopup(
-              { text: "Scan QR Code" },
-              function(data) {
-                  result.textContent = "QR Code: " + data;
-                  Telegram.WebApp.closeScanQrPopup();
-              }
-          );
-      } else {
-          alert("QR scanner hanya berfungsi dalam Telegram Mini App");
+    try {
+      log('Mencari Telegram objek...');
+      
+      if (!window.Telegram || !window.Telegram.WebApp) {
+        throw new Error('GAGAL: Bukan dalam aplikasi Telegram.');
       }
-  });
+
+      var tg = window.Telegram.WebApp;
+      tg.ready();
+      tg.expand();
+      
+      log('Telegram dikesan: ' + tg.platform);
+      log('Versi WebApp: ' + tg.version);
+
+      // --- LOGIK BARU (FORCE MODE) ---
+      // Kita tidak check platform 'android'/'ios'.
+      // Kita hanya check sama ada fungsi showScanQrPopup ADA atau TIDAK.
+      
+      var btn = document.getElementById('startScan');
+
+      if (typeof tg.showScanQrPopup === 'function') {
+        log('Fungsi QR Scanner DITEMUI.', 'success');
+        log('Tekan butang di bawah untuk cuba buka kamera.');
+        
+        btn.onclick = function() {
+          log('Butang ditekan. Cuba buka kamera native...');
+          
+          try {
+            tg.showScanQrPopup({ text: 'Imbas Kod QR' }, function(result) {
+              log('✅ BERJAYA! Hasil: ' + result, 'success');
+              tg.closeScanQrPopup();
+            });
+          } catch (e) {
+            log('RALAT masa buka kamera: ' + e.message, 'error');
+          }
+        };
+      } else {
+        log('RALAT: Telefon ini tidak support QR Scanner.', 'error');
+        log('Kemungkinan versi Telegram terlalu lama.');
+        btn.disabled = true;
+        btn.style.backgroundColor = '#ccc';
+      }
+
+    } catch (err) {
+      log(err.message, 'error');
+    }
+  </script>
+</body>
+</html>
 </script>
 </body>
 </html>
+
