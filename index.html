@@ -27,8 +27,9 @@
     .header { text-align: center; margin-bottom: 20px; animation: float 3s ease-in-out infinite; width: 100%; }
     @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
 
+    /* UBAHAN: Buang max-width, lebar 100% */
     .banner-frame {
-      width: 100%; max-width: 320px; margin: 0 auto 20px auto;
+      width: 100%; 
       background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 20px; padding: 20px;
       box-shadow: 0 15px 35px rgba(108,99,255,0.3); display: flex; align-items: center; justify-content: center; gap: 15px;
       position: relative; overflow: hidden; box-sizing: border-box;
@@ -37,10 +38,10 @@
     .banner-logo { width: 50px; height: 50px; flex-shrink: 0; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
     .banner-text { text-align: left; position: relative; z-index: 1; flex-grow: 1; }
     .banner-title { font-size: 28px; font-weight: 800; color: white; margin: 0; line-height: 1; letter-spacing: 1px; }
-    .banner-subtitle { font-size: 12px; color: rgba(255,255,255,0.9); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+    .banner-subtitle { font-size: 13px; color: rgba(255,255,255,0.9); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
     .subtitle { font-size: 16px; color: #636E72; margin-top: 5px; font-weight: 400; line-height: 1.4; }
 
-    /* --- STYLING UNTUK INPUT (DIPERBAIKI) --- */
+    /* --- STYLING UNTUK INPUT --- */
     .input-card {
       background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 15px;
@@ -48,7 +49,12 @@
     }
     .input-row { display: flex; gap: 10px; margin-bottom: 15px; }
     .input-group { flex: 1; }
-    .input-label { font-size: 12px; font-weight: 600; color: #636E72; margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+    .input-label { 
+      font-size: 13px; font-weight: 600; color: #636E72; margin-bottom: 6px; 
+      display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; 
+    }
+    .input-label svg { opacity: 0.7; }
+
     .input-field {
       width: 100%; padding: 12px; border: 1px solid rgba(0,0,0,0.05); border-radius: 10px;
       background: rgba(255,255,255,0.6); font-family: 'Outfit', sans-serif; font-size: 15px;
@@ -57,26 +63,41 @@
     }
     .input-field:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(108,99,255,0.1); }
     
-    /* PEMBAETAN: align-items: flex-end supaya butang sejajar dengan input */
     .search-row { display: flex; gap: 10px; align-items: flex-end; }
     .search-row .input-group { margin-bottom: 0; }
     
-    /* PEMBAETAN: height: 100% dihapuskan supaya butang tidak terlalu panjang */
     .btn-search {
       padding: 12px 16px; background: var(--dark); color: white; border: none; border-radius: 10px;
       font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: transform 0.2s, opacity 0.2s; flex-shrink: 0; 
+      transition: transform 0.2s, opacity 0.2s; flex-shrink: 0;
     }
     .btn-search:active { transform: scale(0.95); }
     /* ------------------------------------- */
 
-    .debug-container { display: none; justify-content: center; align-items: center; margin-bottom: 10px; font-size: 14px; color: #636E72; }
-    .switch { position: relative; display: inline-block; width: 50px; height: 26px; margin-left: 10px; }
+    /* UBAHAN: Debug Box Style (Hitam) */
+    .debug-container {
+      display: none; flex-direction: column; background-color: #1e1e1e; color: #ffffff;
+      border-radius: 12px; padding: 15px; margin-bottom: 15px; box-sizing: border-box;
+      font-family: 'Courier New', Courier, monospace; font-size: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid #333;
+    }
+    .debug-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+      border-bottom: 1px solid #444; padding-bottom: 8px;
+    }
+    .debug-title { color: #aaa; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .debug-output {
+      color: #00ff00; /* Teks hijau */
+      line-height: 1.5; white-space: pre-wrap;
+    }
+    /* --------------------------------- */
+
+    .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
     .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 34px; }
-    .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .3s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
     input:checked + .slider { background-color: var(--success); }
-    input:checked + .slider:before { transform: translateX(24px); }
+    input:checked + .slider:before { transform: translateX(18px); }
 
     .btn-main {
       width: 100%; padding: 18px; font-size: 18px; font-weight: 700; color: white; background: var(--primary);
@@ -101,7 +122,7 @@
 
     .card-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .status-pill {
-      background: rgba(255,101,132,0.15); color: var(--accent); padding: 6px 12px; border-radius: 50px; font-size: 12px;
+      background: rgba(255,101,132,0.15); color: var(--accent); padding: 6px 12px; border-radius: 50px; font-size: 13px;
       font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 6px; transition: all 0.3s ease;
     }
     .status-pill.success-pill { background: rgba(76,175,80,0.15); color: var(--success); }
@@ -137,17 +158,26 @@
     <div class="input-card">
       <div class="input-row">
         <div class="input-group">
-          <label class="input-label">Tarikh Mula</label>
+          <label class="input-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Tarikh Mula
+          </label>
           <input type="date" id="startDate" class="input-field">
         </div>
         <div class="input-group">
-          <label class="input-label">Tarikh Akhir</label>
+          <label class="input-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Tarikh Akhir
+          </label>
           <input type="date" id="endDate" class="input-field">
         </div>
       </div>
       <div class="search-row">
         <div class="input-group">
-          <label class="input-label">No. Matrik / ID</label>
+          <label class="input-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            No. Matrik / ID
+          </label>
           <input type="text" id="manualInput" class="input-field" placeholder="Taip di sini...">
         </div>
         <button class="btn-search" onclick="manualSearch()" title="Cari">
@@ -157,12 +187,16 @@
     </div>
     <!-- TAMAT BAHAGIAN INPUT -->
 
+    <!-- DEBUG CONTAINER BARU (HITAM) -->
     <div id="debugContainer" class="debug-container">
-      <span>Mode Debug</span>
-      <label class="switch">
-        <input type="checkbox" id="debugToggle" onchange="toggleDebugMode()">
-        <span class="slider"></span>
-      </label>
+      <div class="debug-header">
+        <span class="debug-title">Debug Console</span>
+        <label class="switch">
+          <input type="checkbox" id="debugToggle" onchange="toggleDebugMode()">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div id="debugOutput" class="debug-output">Menunggu data...</div>
     </div>
 
     <button id="scanBtn" class="btn-main" onclick="openScanner()">
@@ -185,8 +219,9 @@
     const scanBtn = document.getElementById('scanBtn');
     const listContainer = document.getElementById('list-container');
     const collectBtn = document.getElementById('collectBtn');
-    const debugToggle = document.getElementById('debugToggle');
     const debugContainer = document.getElementById('debugContainer');
+    const debugOutput = document.getElementById('debugOutput'); // Rujukan output debug
+    const debugToggle = document.getElementById('debugToggle');
     
     // Rujukan Input Baru
     const startDateInput = document.getElementById('startDate');
@@ -225,7 +260,11 @@
       scanBtn.disabled = true;
     }
 
-    function toggleDebugMode() { isDebugMode = debugToggle.checked; }
+    function toggleDebugMode() { 
+      isDebugMode = debugToggle.checked; 
+      // Papar status mode dalam kotak debug
+      debugOutput.innerText = `Debug Mode: ${isDebugMode ? 'ON' : 'OFF'}\nReady...`;
+    }
 
     // Fungsi untuk tukar format tarikh (HTML Date -> DD/MM/YYYY)
     function formatDateForAPI(dateStr) {
@@ -247,7 +286,7 @@
     function openScanner() {
       listContainer.innerHTML = '';
       collectBtn.style.display = 'none';
-      debugContainer.style.display = 'none';
+      // Jangan sembunyikan debug container jika sudah terbuka
       rowsToUpdate = [];
       currentItemList = [];
       subtitleText.innerText = "Tekan butang untuk imbas";
@@ -266,13 +305,16 @@
     async function verifyData(qrData) {
       setLoading(true);
       subtitleText.innerText = "Memproses data...";
+      
+      // Update debug output
+      if (debugContainer.style.display === 'flex') {
+         debugOutput.innerText = `Scanning: ${qrData}\nMemuat turun data...`;
+      }
 
-      // Dapatkan tarikh dari input
       const startDate = formatDateForAPI(startDateInput.value);
       const endDate = formatDateForAPI(endDateInput.value);
 
       try {
-        // Hantar parameter tarikh mula & tarikh akhir
         let url = SCRIPT_URL + '?action=search&qrData=' + encodeURIComponent(qrData) + 
                   '&startDate=' + encodeURIComponent(startDate) + 
                   '&endDate=' + encodeURIComponent(endDate);
@@ -283,9 +325,14 @@
         const data = await res.json();
 
         if (data.isStaff) {
-          debugContainer.style.display = 'flex';
-          subtitleText.innerText = `Hi ${data.staffName}!`;
+          debugContainer.style.display = 'flex'; // Papar kotak hitam
+          // Tulis output ke dalam kotak debug
+          debugOutput.innerText = `USER: ${data.staffName}\nID: ${currentUserId || 'N/A'}\nSTATUS: Staff Detected`;
+          
+          // Subtitle biasa tetap menunjukkan mesej umum
+          subtitleText.innerText = "Selamat Datang, " + data.staffName;
         } else {
+          // Debug box kekal hidden jika bukan staff
           debugContainer.style.display = 'none';
           subtitleText.innerText = "Selamat Datang";
         }
@@ -307,6 +354,9 @@
         }
       } catch (err) {
         subtitleText.innerText = "❌ Ralat: " + err.message;
+        if (debugContainer.style.display === 'flex') {
+            debugOutput.innerText += `\nERROR: ${err.message}`;
+        }
       } finally {
         setLoading(false);
       }
@@ -316,6 +366,7 @@
       if (rowsToUpdate.length === 0) return;
       setLoading(true);
       subtitleText.innerText = "Menyimpan...";
+      if (debugContainer.style.display === 'flex') debugOutput.innerText = "Updating status...";
 
       try {
         let url = SCRIPT_URL + '?action=update&rows=' + rowsToUpdate.join(',') + (currentUserId ? '&userId=' + currentUserId : '');
@@ -324,6 +375,8 @@
 
         if (data.status === 'success') {
           subtitleText.innerHTML = "✅ <b>Berjaya dikemaskini!</b>";
+          if (debugContainer.style.display === 'flex') debugOutput.innerText = "Status Update: SUCCESS";
+          
           renderList(currentItemList, true); 
           collectBtn.style.display = 'none';
           rowsToUpdate = [];
@@ -335,6 +388,7 @@
         }
       } catch (err) {
         subtitleText.innerText = "❌ Gagal: " + err.message;
+        if (debugContainer.style.display === 'flex') debugOutput.innerText = `ERROR: ${err.message}`;
       } finally {
         setLoading(false);
       }
@@ -360,7 +414,7 @@
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="6" y="2" width="4" height="4" fill="#636E72"/><rect x="4" y="8" width="8" height="2" fill="#636E72"/><rect x="3" y="10" width="2" height="4" fill="#636E72"/><rect x="11" y="10" width="2" height="4" fill="#636E72"/></svg>
             ${item.nama}
           </div>
-          <div class="item-meta" style="font-size: 13px; opacity: 0.8;">ID: ${item.noMatrik}</div>
+          <div class="item-meta" style="font-size: 14px; opacity: 0.8;">ID: ${item.noMatrik}</div>
         `;
         fragment.appendChild(card);
       });
