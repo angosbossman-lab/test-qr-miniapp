@@ -7,6 +7,16 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
+    /* ==============================================
+       RESET & BASE (BETULAN SCROLL)
+    ============================================== */
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%;
+      overflow-x: hidden; /* HALANG SCROLL KIRI KANAN */
+      scroll-behavior: smooth;
+    }
+
     :root {
       --primary: #6C63FF;
       --accent: #FF6584;
@@ -19,7 +29,6 @@
 
     body {
       font-family: 'Outfit', sans-serif;
-      margin: 0; padding: 0;
       min-height: 100vh;
       display: flex; flex-direction: column;
       align-items: center;
@@ -27,33 +36,51 @@
       background-attachment: fixed;
       color: var(--dark);
       -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
+      position: relative; /* Penting untuk z-index */
     }
 
+    /* Background Shapes - Added pointer-events: none */
     .bg-shape {
       position: fixed; border-radius: 50%; filter: blur(80px); z-index: -1;
+      pointer-events: none; /* Supaya tak block scroll */
     }
-    .shape-1 { width: 300px; height: 300px; background: #D1C4E9; top: -50px; left: -100px; opacity: 0.6; }
-    .shape-2 { width: 400px; height: 400px; background: #BBDEFB; bottom: -100px; right: -100px; opacity: 0.6; }
+    .shape-1 { width: 300px; height: 300px; background: #D1C4E9; top: -50px; left: -50px; opacity: 0.6; }
+    .shape-2 { width: 400px; height: 400px; background: #BBDEFB; bottom: -50px; right: -50px; opacity: 0.6; }
 
     .app-container {
       width: 100%; max-width: 450px;
-      padding: 25px;
+      padding: 25px; padding-top: 30px;
       box-sizing: border-box;
       display: flex; flex-direction: column;
+      position: relative; /* Anchor */
     }
 
-    .header { text-align: center; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+    /* ==============================================
+       HEADER & BANNER
+    ============================================== */
+    .header { 
+      text-align: center; 
+      margin-bottom: 20px; 
+      animation: float 3s ease-in-out infinite;
+      width: 100%;
+    }
+    
     @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
 
+    /* BANNER FIX */
     .banner-frame {
-      width: 100%; max-width: 320px; margin: 0 auto 20px;
+      width: 100%; /* Tetapkan lebar penuh */
+      max-width: 320px; /* Hadkan lebar maksima */
+      margin: 0 auto 20px auto; /* Centerkan */
       background: linear-gradient(135deg, var(--primary), var(--accent));
-      border-radius: 20px; padding: 20px;
+      border-radius: 20px; 
+      padding: 20px;
       box-shadow: 0 15px 35px rgba(108, 99, 255, 0.3);
       display: flex; align-items: center; justify-content: center; gap: 15px;
       position: relative; overflow: hidden;
+      box-sizing: border-box; /* Pastikan padding tak melebar kan div */
     }
+    
     .banner-frame::after {
       content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
       background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
@@ -61,18 +88,26 @@
     }
 
     .banner-logo {
-      width: 50px; height: 50px;
+      width: 50px; height: 50px; flex-shrink: 0; /* Jangan kecilkan */
       background: rgba(255,255,255,0.2); border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
       position: relative; z-index: 1; backdrop-filter: blur(5px);
     }
 
-    .banner-text { text-align: left; position: relative; z-index: 1; }
+    .banner-text { 
+      text-align: left; 
+      position: relative; z-index: 1; 
+      flex-grow: 1; /* Biar text ambil ruang saki baki */
+    }
+    
     .banner-title { font-size: 28px; font-weight: 800; color: white; margin: 0; line-height: 1; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .banner-subtitle { font-size: 12px; color: rgba(255,255,255,0.9); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
 
     .subtitle { font-size: 16px; color: #636E72; margin-top: 5px; font-weight: 400; line-height: 1.4; }
 
+    /* ==============================================
+       DEBUG & BUTTONS
+    ============================================== */
     .debug-container {
       display: none; justify-content: center; align-items: center;
       margin-bottom: 10px; font-size: 14px; color: #636E72;
@@ -96,7 +131,7 @@
       border: none; border-radius: 16px; cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 12px;
       box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
-      transition: all 0.2s ease;
+      transition: all 0.2s ease; box-sizing: border-box;
     }
     .btn-main:active { transform: scale(0.96); }
     .btn-main:disabled { background: #B2BEC3; box-shadow: none; cursor: not-allowed; }
@@ -110,26 +145,34 @@
 
     #list-container { width: 100%; margin-top: 20px; }
 
+    /* ==============================================
+       CARDS & ITEMS
+    ============================================== */
     .item-card {
       background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px;
       margin-bottom: 15px; box-shadow: var(--shadow-soft); position: relative; overflow: hidden;
       animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-sizing: border-box;
     }
+    
     .item-card::before {
       content: ''; position: absolute; left: 0; top: 0; bottom: 0;
       width: 6px; background: var(--accent); transition: background 0.3s ease;
     }
+
     .item-card.success-card::before { background: var(--success); }
     .item-card.success-card { border-color: rgba(76, 175, 80, 0.3); }
 
     .card-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+
     .status-pill {
       background: rgba(255, 101, 132, 0.15); color: var(--accent);
       padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 700;
       text-transform: uppercase; display: flex; align-items: center; gap: 6px;
       transition: all 0.3s ease;
     }
+
     .status-pill.success-pill { background: rgba(76, 175, 80, 0.15); color: var(--success); }
 
     .item-name { font-size: 20px; font-weight: 800; color: var(--dark); margin: 5px 0; }
@@ -140,7 +183,7 @@
     .debug-box {
       margin-top: 15px; padding: 15px;
       background: rgba(0,0,0,0.05); border-radius: 10px; text-align: left;
-      font-size: 12px; border: 1px dashed #B2BEC3;
+      font-size: 12px; border: 1px dashed #B2BEC3; box-sizing: border-box;
     }
     .debug-box b { color: var(--primary); }
 
@@ -181,7 +224,7 @@
     </div>
 
     <button id="scanBtn" class="btn-main" onclick="openScanner()">
-      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none">
+      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="1" y="5" width="14" height="9" rx="2" fill="white"/>
         <rect x="4" y="3" width="8" height="2" fill="white"/>
         <rect x="5" y="7" width="6" height="5" rx="3" fill="#6C63FF"/>
@@ -193,7 +236,7 @@
     <div id="list-container"></div>
 
     <button id="collectBtn" class="btn-main btn-collect" onclick="updateStatus()">
-      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none">
+      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="2" y="9" width="3" height="3" fill="white"/>
         <rect x="5" y="12" width="3" height="2" fill="white"/>
         <rect x="8" y="7" width="3" height="3" fill="white"/>
@@ -208,7 +251,7 @@
     // ==============================================
     // KONFIGURASI
     // ==============================================
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbztu8TtP0JHPEvtRP0FEG4Uemns2MMLAiGWUA7xX1TPwy0GEsh67BHNtjjdp9r9brs/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmdsEunQEEkPWfbC4mxKKMox0GgTLHf1ChXzsIbJCl3KNaZAU_wB1MBN7d_xC__H0/exec';
     
     const subtitleText = document.getElementById('subtitle-text');
     const scanBtn = document.getElementById('scanBtn');
@@ -276,7 +319,6 @@
         const res = await fetch(url);
         const data = await res.json();
 
-        // Semak Status Staff
         if (data.isStaff) {
           debugContainer.style.display = 'flex';
           subtitleText.innerText = `Hi ${data.staffName}!`;
@@ -284,7 +326,6 @@
           debugContainer.style.display = 'none';
         }
 
-        // Handle Data
         if (data.status === 'found_pending') {
           const count = data.list.length;
           subtitleText.innerText += ` Dijumpai ${count} item.`;
@@ -293,7 +334,6 @@
           currentItemList = data.list;
           renderList(currentItemList, false);
           
-          // Hanya Staff boleh nampak butang collected
           if (data.isStaff) {
             collectBtn.style.display = 'flex';
             tg.HapticFeedback.notificationOccurred('warning');
@@ -400,4 +440,3 @@
   </script>
 </body>
 </html>
-
