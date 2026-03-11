@@ -7,7 +7,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: var(--tg-theme-bg-color, #ffffff);
       color: var(--tg-theme-text-color, #222222);
       margin: 0; padding: 20px;
@@ -15,75 +15,53 @@
       align-items: center;
     }
     .container { width: 100%; max-width: 400px; }
-    
     button {
       width: 100%; padding: 15px; font-size: 16px; font-weight: bold;
       color: white; background-color: var(--tg-theme-button-color, #2481cc);
       border: none; border-radius: 10px; cursor: pointer; margin-top: 20px;
-      transition: opacity 0.2s;
     }
-    button:active { opacity: 0.8; }
     button:disabled { background-color: #cccccc; cursor: not-allowed; }
-
-    /* Card Profil */
     #profile-card {
-      display: none;
-      margin-top: 20px;
-      padding: 20px;
+      display: none; margin-top: 20px; padding: 20px;
       background-color: var(--tg-theme-secondary-bg-color, #f4f4f4);
-      border-radius: 12px;
-      text-align: left;
-      width: 100%;
-      box-sizing: border-box;
-      border-left: 5px solid #4CAF50;
+      border-radius: 12px; text-align: left; width: 100%;
+      box-sizing: border-box; border-left: 5px solid #4CAF50;
     }
     #profile-card h3 { margin-top: 0; margin-bottom: 15px; font-size: 18px; }
     #profile-card p { margin: 5px 0; font-size: 15px; }
     #profile-card .label { font-size: 12px; opacity: 0.6; display: block; margin-top: 10px; }
-    
-    /* Status Box */
-    #status-box {
-      margin-top: 20px; text-align: center;
-      font-size: 14px; color: var(--tg-theme-hint-color, #999);
-    }
+    #status-box { margin-top: 20px; text-align: center; font-size: 14px; color: var(--tg-theme-hint-color, #999); }
   </style>
 </head>
 <body>
 
   <div class="container">
     <h3>🔍 Pengesahan Peserta</h3>
-    
     <div id="status-box">Tekan butang di bawah untuk imbas.</div>
-    
     <button id="startScan">IMBAS QR</button>
     
     <div id="profile-card">
       <h3 id="card-title">Maklumat Peserta</h3>
-      <span class="label">NO MATRIK</span>
-      <p id="res-matrik"><b>-</b></p>
-      
-      <span class="label">NAMA</span>
-      <p id="res-nama"><b>-</b></p>
-      
-      <span class="label">BAHAGIAN</span>
-      <p id="res-bahagian"><b>-</b></p>
+      <span class="label">NO MATRIK</span><p id="res-matrik"><b>-</b></p>
+      <span class="label">NAMA</span><p id="res-nama"><b>-</b></p>
+      <span class="label">BAHAGIAN</span><p id="res-bahagian"><b>-</b></p>
     </div>
   </div>
 
   <script>
-    // =====================================
-    // PENTING: TUKAR URL DI BAWAH INI
-    // =====================================
+    // ==============================================
+    // KONFIGURASI
+    // ==============================================
+    // PASTIKAN ANDA TUKAR INI DENGAN URL WEB APP BARU
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHx2h0emqzLSjtNN0JMv69RMLm4CbckbwqQHkIjeCB4nDIh_bPOpACl7uthAh1IBHh/exec';
-    // =====================================
-
+    
     const statusBox = document.getElementById('status-box');
     const startBtn = document.getElementById('startScan');
     const profileCard = document.getElementById('profile-card');
 
-    // Check jika Telegram objek wujud
+    // Init Telegram
     if (!window.Telegram || !window.Telegram.WebApp) {
-      statusBox.innerHTML = "⚠️ <b>Ralat:</b> Sila buka melalui aplikasi Telegram.";
+      statusBox.innerHTML = "⚠️ <b>Ralat:</b> Buka dalam Telegram.";
       startBtn.disabled = true;
       throw new Error("Bukan Telegram");
     }
@@ -92,14 +70,13 @@
     tg.ready();
     tg.expand();
 
-    // Semak jika URL masih default
+    // Check URL configuration
     if (SCRIPT_URL === 'MASUKKAN_URL_WEB_APP_ANDA_DISINI' || SCRIPT_URL === '') {
-      statusBox.innerHTML = "⚠️ <b>Ralat Konfigurasi:</b> URL Script masih kosong dalam kod.";
+      statusBox.innerHTML = "⚠️ <b>Ralat:</b> URL Script kosong.";
       startBtn.disabled = true;
     }
 
     startBtn.onclick = function() {
-      // Reset UI
       profileCard.style.display = 'none';
       statusBox.innerText = "Meminta akses kamera...";
       
@@ -111,37 +88,37 @@
           }
         });
       } else {
-        statusBox.innerText = "⚠️ Peranti ini tidak menyokong scanner (versi Telegram lama).";
+        statusBox.innerText = "⚠️ Scanner tidak disokong.";
       }
     };
 
+    // ==============================================
+    // FUNGSI SEMAK DATA (METHOD GET)
+    // ==============================================
     async function verifyWithSheet(qrData) {
       statusBox.innerText = "Menyambung ke server...";
       startBtn.disabled = true;
 
       try {
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ qrData: qrData })
-        });
+        // KITA TUKAR KEPADA GET REQUEST
+        // Data dihantar sebagai parameter URL: ?qrData=xxxxx
+        const urlWithParam = SCRIPT_URL + '?qrData=' + encodeURIComponent(qrData);
 
+        const response = await fetch(urlWithParam);
+        
         if (!response.ok) {
-          throw new Error('Server respond dengan status ' + response.status);
+          throw new Error('Server error: ' + response.status);
         }
 
         const result = await response.json();
 
         if (result.status === 'found') {
-          // SUCCESS
           statusBox.innerText = "✅ Pengesahan berjaya.";
           showProfile(result.details);
           tg.HapticFeedback.notificationOccurred('success');
         } else if (result.status === 'error') {
-          // SERVER ERROR
-          statusBox.innerHTML = "<span style='color:red'>❌ Ralat Server: " + result.message + "</span>";
+          statusBox.innerHTML = "<span style='color:red'>❌ Ralat: " + result.message + "</span>";
         } else {
-          // NOT FOUND
           statusBox.innerHTML = "<span style='color:orange'>⚠️ " + result.message + "</span>";
           tg.HapticFeedback.notificationOccurred('warning');
         }
@@ -157,10 +134,8 @@
       document.getElementById('res-matrik').innerText = data.noMatrik;
       document.getElementById('res-nama').innerText = data.nama;
       document.getElementById('res-bahagian').innerText = data.bahagian;
-      
       document.getElementById('card-title').innerText = "✅ Pengesahan Berjaya";
       document.getElementById('card-title').style.color = "#4CAF50";
-      
       profileCard.style.display = 'block';
     }
   </script>
