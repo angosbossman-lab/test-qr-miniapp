@@ -1,22 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Mini App QR Test</title>
-  <script src="https://unpkg.com/@telegram-webapps/sdk"></script>
+<meta charset="UTF-8">
+<title>Test QR Scanner</title>
 </head>
 <body>
-  <h1>Mini App Test QR</h1>
-  <button id="scanBtn">Scan QR</button>
+<h2>Mini App QR Test</h2>
+<button id="scanBtn">Scan QR</button>
+<p id="result"></p>
 
-  <script>
-    const scanBtn = document.getElementById("scanBtn");
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+  // Pastikan Web App siap sebelum kita panggil QR
+  Telegram.WebApp.ready();
 
-    scanBtn.addEventListener("click", () => {
-      Telegram.WebApp.showScanQrPopup({ text: "Scan QR" }, (result) => {
-        alert("QR Scanned: " + result);
-      });
-    });
-  </script>
+  const btn = document.getElementById("scanBtn");
+  const result = document.getElementById("result");
+
+  btn.addEventListener("click", () => {
+      if (Telegram.WebApp.showScanQrPopup) {
+          Telegram.WebApp.showScanQrPopup(
+              { text: "Scan QR Code" },
+              function(data) {
+                  result.textContent = "QR Code: " + data;
+                  Telegram.WebApp.closeScanQrPopup();
+              }
+          );
+      } else {
+          alert("QR scanner hanya berfungsi dalam Telegram Mini App");
+      }
+  });
+</script>
 </body>
 </html>
