@@ -1,165 +1,146 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>QR Scanner Telegram</title>
-    <!-- Script Telegram Web App -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        /* Menggunakan variabel warna Telegram agar cocok dengan tema HP */
-        body {
-            font-family: sans-serif;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container { width: 100%; max-width: 500px; text-align: center; }
-        #videoContainer { position: relative; width: 100%; background: #000; border-radius: 10px; overflow: hidden; }
-        #video { width: 100%; height: auto; display: block; }
-        #canvas { display: none; }
-        #scanLine { position: absolute; width: 100%; height: 2px; background: var(--tg-theme-button-color, #00ff00); top: 0; left: 0; box-shadow: 0 0 10px var(--tg-theme-button-color, #00ff00); animation: scan 2s linear infinite; }
-        @keyframes scan { 0% { top: 0%; } 50% { top: 98%; } 100% { top: 0%; } }
-        #result { padding: 15px; background: var(--tg-theme-secondary-bg-color, #f0f0f0); border-radius: 5px; margin-top: 20px; word-break: break-all; }
-        button { 
-            width: 100%; padding: 15px; border: none; border-radius: 5px; 
-            background-color: var(--tg-theme-button-color, #007bff); 
-            color: var(--tg-theme-button-text-color, #fff); 
-            font-size: 16px; cursor: pointer; margin-top: 20px; 
-        }
-        .status { margin-top: 15px; font-size: 14px; color: var(--tg-theme-hint-color, #666); }
-    </style>
+  <meta charset="UTF-8">
+  <title>QR Scanner Force Mode</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: var(--tg-theme-bg-color, #ffffff);
+      color: var(--tg-theme-text-color, #222222);
+      margin: 0; padding: 20px;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      height: 100vh; text-align: center;
+    }
+    .container { width: 90%; max-width: 400px; }
+    button {
+      width: 100%; padding: 15px; font-size: 16px; font-weight: bold;
+      color: white; background-color: var(--tg-theme-button-color, #2481cc);
+      border: none; border-radius: 8px; cursor: pointer; margin-top: 20px;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    #log-box {
+      margin-top: 20px; padding: 10px;
+      background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      border-radius: 8px; font-size: 12px; text-align: left;
+      word-break: break-all; min-height: 100px; max-height: 300px; overflow-y: auto;
+    }
+    .error { color: red; font-weight: bold; }
+    .success { color: green; font-weight: bold; }
+  </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Hai, <span id="userName">Guest</span>!</h2>
-    <p class="status">Scan QR untuk absensi</p>
+  <div class="container">
+    <h3>🛠️ Force Scan Mode</h3>
+    <button id="startScan">MULA IMBAS QR</button>
     
-    <div id="videoContainer">
-        <video id="video" playsinline></video>
-        <canvas id="canvas"></canvas>
-        <div id="scanLine" style="display:none;"></div>
+    <div id="log-box">
+      Sistem memulakan...<br>
     </div>
+  </div>
 
-    <div id="result">Menunggu QR Code...</div>
-</div>
-
-<!-- Library Decoder -->
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-
-<script>
-    // === INISIALISASI TELEGRAM WEB APP ===
-    const tg = window.Telegram.WebApp;
-    tg.expand(); // Memperluas tampilan ke full screen
-    tg.ready();  // Menandakan app sudah siap
-
-    // Ambil data user dari Telegram
-    const user = tg.initDataUnsafe.user;
-    const userId = user ? user.id : 'Unknown';
-    const userName = user ? user.first_name : 'Guest';
-    
-    // Tampilkan nama user di UI
-    document.getElementById('userName').innerText = userName;
-
+  <script>
     // === KONFIGURASI ===
-    const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL'; // Ganti dengan URL Anda
+    // GANTIKAN INI DENGAN URL GOOGLE APPS SCRIPT ANDA
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyGFF9Mh9bz_SylU3cbbaS0GK-rwGSTDv07tc5D1ySMh5RDESXavu5MJosg_HbOxOn6/exec'; 
 
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    const resultDiv = document.getElementById('result');
-    const scanLine = document.getElementById('scanLine');
-    
-    let scanning = false;
-    let stream = null;
-
-    // Gunakan MainButton Telegram jika diperlukan, atau auto-start
-    // Di sini kita auto-start kamera saat web dibuka
-    startCamera();
-
-    async function startCamera() {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-            video.srcObject = stream;
-            video.setAttribute("playsinline", true);
-            await video.play();
-
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            scanLine.style.display = 'block';
-            scanning = true;
-            requestAnimationFrame(scanFrame);
-        } catch (err) {
-            resultDiv.innerText = "Error Kamera: " + err.message;
-        }
+    function log(msg, type) {
+      var box = document.getElementById('log-box');
+      var time = new Date().toLocaleTimeString();
+      var colorClass = '';
+      if(type === 'error') colorClass = 'error';
+      if(type === 'success') colorClass = 'success';
+      
+      box.innerHTML += '<div class="' + colorClass + '">[' + time + '] ' + msg + '</div>';
+      // Auto scroll ke bawah
+      box.scrollTop = box.scrollHeight;
+      console.log(msg);
     }
 
-    function scanFrame() {
-        if (!scanning) return;
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
+    // Fungsi untuk hantar data ke Sheet
+    function saveToSheet(qrData, userId, userName) {
+      log('Menghubungi server...');
 
-            if (code) {
-                handleQRCode(code.data);
-                return;
-            }
+      var dataToSend = {
+        qrData: qrData,
+        telegramId: userId,
+        telegramName: userName
+      };
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSend)
+      })
+      .then(() => {
+        log('✅ Data berjaya dihantar ke Sheet!', 'success');
+        // Getar telefon sebagai tanda berjaya (jika ada sokongan)
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
         }
-        requestAnimationFrame(scanFrame);
+      })
+      .catch((error) => {
+        log('❌ Gagal hubungi server: ' + error.message, 'error');
+      });
     }
 
-    function handleQRCode(qrData) {
-        scanning = false;
-        scanLine.style.display = 'none';
+    try {
+      log('Mencari Telegram objek...');
+      
+      if (!window.Telegram || !window.Telegram.WebApp) {
+        throw new Error('GAGAL: Bukan dalam aplikasi Telegram.');
+      }
+
+      var tg = window.Telegram.WebApp;
+      tg.ready();
+      tg.expand();
+      
+      log('Telegram dikesan: ' + tg.platform);
+      
+      // Dapatkan info user
+      var user = tg.initDataUnsafe.user;
+      var userId = user ? user.id : 'Unknown';
+      var userName = user ? user.first_name : 'Guest';
+      
+      log('User: ' + userName + ' (ID: ' + userId + ')');
+
+      var btn = document.getElementById('startScan');
+
+      if (typeof tg.showScanQrPopup === 'function') {
+        log('Status: Ready. Tekan butang untuk imbas.', 'success');
         
-        // Tampilkan notifikasi di Telegram (bisa di comment jika tidak perlu)
-        // tg.showPopup({ title: 'Ditemukan!', message: 'QR: ' + qrData }); 
-
-        resultDiv.innerHTML = `Mengirim data untuk <strong>${userName}</strong>...`;
-
-        // Kirim Data: QR + User ID + Nama
-        saveToSheet(qrData, userId, userName);
-    }
-
-    async function saveToSheet(qrData, uid, name) {
-        const payload = {
-            qrData: qrData,
-            telegramId: uid,
-            telegramName: name
-        };
-
-        try {
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+        btn.onclick = function() {
+          log('Meminta akses kamera...');
+          
+          try {
+            tg.showScanQrPopup({ text: 'Imbas Kod QR' }, function(result) {
+              log('QR Dikesan: ' + result);
+              tg.closeScanQrPopup(); // Tutup popup scanner
+              
+              // Hantar data ke Sheet
+              saveToSheet(result, userId, userName);
             });
+          } catch (e) {
+            log('RALAT masa buka kamera: ' + e.message, 'error');
+          }
+        };
+      } else {
+        log('RALAT: Telefon ini tidak support QR Scanner.', 'error');
+        log('Kemungkinan versi Telegram terlalu lama.');
+        btn.disabled = true;
+        btn.style.backgroundColor = '#ccc';
+      }
 
-            resultDiv.innerHTML = `<span style="color:green">Terima kasih ${name}, data tersimpan!</span>`;
-            
-            // Getar HP (Haptic Feedback) saat sukses
-            tg.HapticFeedback.notificationOccurred('success');
-
-            // Lanjutkan scan setelah 3 detik
-            setTimeout(() => {
-                scanning = true;
-                scanLine.style.display = 'block';
-                requestAnimationFrame(scanFrame);
-                resultDiv.innerHTML = "Menunggu QR Code...";
-            }, 3000);
-
-        } catch (error) {
-            resultDiv.innerText = "Gagal kirim: " + error;
-            tg.HapticFeedback.notificationOccurred('error');
-        }
+    } catch (err) {
+      log(err.message, 'error');
     }
-</script>
+  </script>
 </body>
 </html>
