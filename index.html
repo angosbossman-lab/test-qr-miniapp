@@ -3,18 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pengesahan Pixel</title>
+  <title>ParcelHub System</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    /* ==============================================
-       PALET WARNA & TEMA
-    ============================================== */
     :root {
-      --primary: #6C63FF;       /* Ungu Modern */
-      --accent: #FF6584;        /* Pink Coral */
+      --primary: #6C63FF;
+      --accent: #FF6584;
+      --success: #4CAF50;
       --dark: #2D3436;
-      --light: #FFFFFF;
       --glass: rgba(255, 255, 255, 0.85);
       --glass-border: rgba(255, 255, 255, 0.5);
       --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -46,39 +43,57 @@
       display: flex; flex-direction: column;
     }
 
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
-      animation: float 3s ease-in-out infinite;
+    .header { text-align: center; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+
+    .banner-frame {
+      width: 100%; max-width: 320px; margin: 0 auto 20px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 20px; padding: 20px;
+      box-shadow: 0 15px 35px rgba(108, 99, 255, 0.3);
+      display: flex; align-items: center; justify-content: center; gap: 15px;
+      position: relative; overflow: hidden;
     }
-    
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
+    .banner-frame::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+      background-size: 10px 10px; opacity: 0.5;
     }
 
-    .icon-frame {
-      width: 80px; height: 80px;
-      background: white;
-      border-radius: 24px;
-      margin: 0 auto 15px;
+    .banner-logo {
+      width: 50px; height: 50px;
+      background: rgba(255,255,255,0.2); border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 10px 30px rgba(108, 99, 255, 0.2);
-      border: 2px solid rgba(255,255,255,0.8);
+      position: relative; z-index: 1; backdrop-filter: blur(5px);
     }
 
-    .title { font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.5px; background: linear-gradient(to right, #6C63FF, #FF6584); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .banner-text { text-align: left; position: relative; z-index: 1; }
+    .banner-title { font-size: 28px; font-weight: 800; color: white; margin: 0; line-height: 1; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .banner-subtitle { font-size: 12px; color: rgba(255,255,255,0.9); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+
     .subtitle { font-size: 16px; color: #636E72; margin-top: 5px; font-weight: 400; line-height: 1.4; }
 
+    .debug-container {
+      display: none; justify-content: center; align-items: center;
+      margin-bottom: 10px; font-size: 14px; color: #636E72;
+    }
+    .switch { position: relative; display: inline-block; width: 50px; height: 26px; margin-left: 10px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc; transition: .3s; border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
+      background-color: white; transition: .3s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--success); }
+    input:checked + .slider:before { transform: translateX(24px); }
+
     .btn-main {
-      width: 100%;
-      padding: 18px;
-      font-size: 18px; font-weight: 700;
-      color: white;
-      background: var(--primary);
-      border: none; border-radius: 16px;
-      cursor: pointer;
+      width: 100%; padding: 18px; font-size: 18px; font-weight: 700;
+      color: white; background: var(--primary);
+      border: none; border-radius: 16px; cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 12px;
       box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
       transition: all 0.2s ease;
@@ -87,8 +102,8 @@
     .btn-main:disabled { background: #B2BEC3; box-shadow: none; cursor: not-allowed; }
 
     .btn-collect {
-      background: var(--accent);
-      box-shadow: 0 10px 20px rgba(255, 101, 132, 0.3);
+      background: var(--success);
+      box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
       margin-top: 20px;
       display: none;
     }
@@ -96,45 +111,38 @@
     #list-container { width: 100%; margin-top: 20px; }
 
     .item-card {
-      background: var(--glass);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 15px;
-      box-shadow: var(--shadow-soft);
-      position: relative;
-      overflow: hidden;
+      background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px;
+      margin-bottom: 15px; box-shadow: var(--shadow-soft); position: relative; overflow: hidden;
       animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    
     .item-card::before {
-      content: '';
-      position: absolute; left: 0; top: 0; bottom: 0;
-      width: 6px; background: var(--accent);
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 6px; background: var(--accent); transition: background 0.3s ease;
     }
+    .item-card.success-card::before { background: var(--success); }
+    .item-card.success-card { border-color: rgba(76, 175, 80, 0.3); }
 
-    .card-row {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 8px;
-    }
-
+    .card-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .status-pill {
-      background: rgba(255, 101, 132, 0.15);
-      color: var(--accent);
-      padding: 6px 12px;
-      border-radius: 50px;
-      font-size: 12px; font-weight: 700;
-      text-transform: uppercase;
-      display: flex; align-items: center; gap: 6px;
+      background: rgba(255, 101, 132, 0.15); color: var(--accent);
+      padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 700;
+      text-transform: uppercase; display: flex; align-items: center; gap: 6px;
+      transition: all 0.3s ease;
     }
+    .status-pill.success-pill { background: rgba(76, 175, 80, 0.15); color: var(--success); }
 
     .item-name { font-size: 20px; font-weight: 800; color: var(--dark); margin: 5px 0; }
     .item-meta { font-size: 15px; color: #636E72; display: flex; align-items: center; gap: 8px; margin-top: 5px; }
 
     .pixel-icon { width: 24px; height: 24px; display: block; }
-    .large-pixel-icon { width: 40px; height: 40px; display: block; }
+    
+    .debug-box {
+      margin-top: 15px; padding: 15px;
+      background: rgba(0,0,0,0.05); border-radius: 10px; text-align: left;
+      font-size: 12px; border: 1px dashed #B2BEC3;
+    }
+    .debug-box b { color: var(--primary); }
 
     @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   </style>
@@ -147,20 +155,33 @@
   <div class="app-container">
     
     <div class="header">
-      <div class="icon-frame">
-        <svg class="large-pixel-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1" y="4" width="14" height="10" fill="#6C63FF"/>
-          <rect x="3" y="6" width="10" height="2" fill="white"/>
-          <rect x="1" y="2" width="14" height="2" fill="#8C85FF"/>
-          <rect x="7" y="8" width="2" height="6" fill="#5A52D9"/>
-        </svg>
+      <div class="banner-frame">
+        <div class="banner-logo">
+          <svg width="32" height="32" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="4" width="14" height="10" fill="white"/>
+            <rect x="3" y="6" width="10" height="2" fill="#6C63FF"/>
+            <rect x="1" y="2" width="14" height="2" fill="white"/>
+            <rect x="7" y="8" width="2" height="6" fill="#FF6584"/>
+          </svg>
+        </div>
+        <div class="banner-text">
+          <h1 class="banner-title">PARCELHUB</h1>
+          <div class="banner-subtitle">MANAGEMENT SYSTEM</div>
+        </div>
       </div>
-      <h1 class="title">Item Checker</h1>
       <div class="subtitle" id="subtitle-text">Tekan butang untuk imbas</div>
     </div>
 
+    <div id="debugContainer" class="debug-container">
+      <span>Mode Debug</span>
+      <label class="switch">
+        <input type="checkbox" id="debugToggle" onchange="toggleDebugMode()">
+        <span class="slider"></span>
+      </label>
+    </div>
+
     <button id="scanBtn" class="btn-main" onclick="openScanner()">
-      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none">
         <rect x="1" y="5" width="14" height="9" rx="2" fill="white"/>
         <rect x="4" y="3" width="8" height="2" fill="white"/>
         <rect x="5" y="7" width="6" height="5" rx="3" fill="#6C63FF"/>
@@ -172,7 +193,7 @@
     <div id="list-container"></div>
 
     <button id="collectBtn" class="btn-main btn-collect" onclick="updateStatus()">
-      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none">
         <rect x="2" y="9" width="3" height="3" fill="white"/>
         <rect x="5" y="12" width="3" height="2" fill="white"/>
         <rect x="8" y="7" width="3" height="3" fill="white"/>
@@ -187,14 +208,19 @@
     // ==============================================
     // KONFIGURASI
     // ==============================================
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-9SyIHEDYrt3zzMlt_9ghK6-RwpBZzrCb5cY4FuNjykdGWpLIBUxAhn3GJizxgSSO/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweP9o9zj_k7Bs2MON57masHQ33xOPI17VufGuUcXax7cdM6wMaOaWP-WiGAK1D8QRo/exec';
     
     const subtitleText = document.getElementById('subtitle-text');
     const scanBtn = document.getElementById('scanBtn');
     const listContainer = document.getElementById('list-container');
     const collectBtn = document.getElementById('collectBtn');
+    const debugToggle = document.getElementById('debugToggle');
+    const debugContainer = document.getElementById('debugContainer');
 
     var rowsToUpdate = [];
+    var currentItemList = [];
+    var isDebugMode = false;
+    var currentUserId = null;
 
     // ==============================================
     // TELEGRAM SETUP
@@ -207,20 +233,26 @@
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
+    
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      currentUserId = tg.initDataUnsafe.user.id;
+    }
 
     if (!SCRIPT_URL || SCRIPT_URL === 'MASUKKAN_URL_WEB_APP_ANDA_DISINI') {
       subtitleText.innerHTML = "⚠️ <b>RALAT:</b> URL Script belum diset.";
       scanBtn.disabled = true;
     }
 
-    // ==============================================
-    // LOGIK UTAMA
-    // ==============================================
+    function toggleDebugMode() {
+      isDebugMode = debugToggle.checked;
+    }
 
     function openScanner() {
       listContainer.innerHTML = '';
       collectBtn.style.display = 'none';
+      debugContainer.style.display = 'none';
       rowsToUpdate = [];
+      currentItemList = [];
       subtitleText.innerText = "Tekan butang untuk imbas";
 
       if (typeof tg.showScanQrPopup === 'function') {
@@ -238,53 +270,73 @@
       subtitleText.innerText = "Memproses data...";
 
       try {
-        // HANTAR GET REQUEST (CARI)
-        const res = await fetch(SCRIPT_URL + '?qrData=' + encodeURIComponent(qrData));
+        let url = SCRIPT_URL + '?qrData=' + encodeURIComponent(qrData);
+        if (currentUserId) url += '&userId=' + currentUserId;
+
+        const res = await fetch(url);
         const data = await res.json();
 
+        // Semak Status Staff
+        if (data.isStaff) {
+          debugContainer.style.display = 'flex';
+          subtitleText.innerText = `Hi ${data.staffName}!`;
+        } else {
+          debugContainer.style.display = 'none';
+        }
+
+        // Handle Data
         if (data.status === 'found_pending') {
           const count = data.list.length;
-          subtitleText.innerText = `✅ Dijumpai ${count} item pending.`;
+          subtitleText.innerText += ` Dijumpai ${count} item.`;
           
           rowsToUpdate = data.list.map(item => item.rowIndex);
-          renderList(data.list);
+          currentItemList = data.list;
+          renderList(currentItemList, false);
           
-          collectBtn.style.display = 'flex';
-          tg.HapticFeedback.notificationOccurred('warning');
-
+          // Hanya Staff boleh nampak butang collected
+          if (data.isStaff) {
+            collectBtn.style.display = 'flex';
+            tg.HapticFeedback.notificationOccurred('warning');
+          }
+          
         } else if (data.status === 'not_found') {
-          let debugMsg = "❌ <b>Tiada item pending.</b>";
-          subtitleText.innerHTML = debugMsg;
-          tg.HapticFeedback.notificationOccurred('error');
+          subtitleText.innerText += " Tiada item pending.";
+          
+          if (isDebugMode && data.debug_info) {
+             let debugHtml = "<div class='debug-box'>";
+             debugHtml += "<b>Server Cari:</b> " + data.debug_info.server_date + "<br>";
+             debugHtml += "<b>Matrik:</b> " + data.debug_info.scan_matrik + "<br>";
+             debugHtml += "<b>Data Row 1:</b> " + data.debug_info.first_row_data;
+             debugHtml += "</div>";
+             subtitleText.innerHTML += debugHtml;
+          }
         } else {
           subtitleText.innerText = "❌ " + data.message;
         }
+
       } catch (err) {
-        subtitleText.innerText = "❌ Ralat Sambungan: " + err.message;
+        subtitleText.innerText = "❌ Ralat: " + err.message;
       } finally {
         setLoading(false);
       }
     }
 
-    // ==============================================
-    // FUNGSI UPDATE (TUKAR KE GET)
-    // ==============================================
     async function updateStatus() {
       if (rowsToUpdate.length === 0) return;
       setLoading(true);
       subtitleText.innerText = "Menyimpan...";
 
       try {
-        // GABUNGKAN INDEX BARIS MENJADI STRING (contoh: "2,5,8")
         var rowsParam = rowsToUpdate.join(',');
-        
-        // HANTAR GET REQUEST DENGAN ACTION=UPDATE
-        const res = await fetch(SCRIPT_URL + '?action=update&rows=' + rowsParam);
+        let url = SCRIPT_URL + '?action=update&rows=' + rowsParam;
+        if (currentUserId) url += '&userId=' + currentUserId;
+
+        const res = await fetch(url);
         const data = await res.json();
 
         if (data.status === 'success') {
           subtitleText.innerHTML = "✅ <b>Berjaya dikemaskini!</b>";
-          listContainer.innerHTML = '';
+          renderList(currentItemList, true); 
           collectBtn.style.display = 'none';
           rowsToUpdate = [];
           tg.HapticFeedback.notificationOccurred('success');
@@ -298,23 +350,22 @@
       }
     }
 
-    function renderList(items) {
+    function renderList(items, isSuccess) {
       listContainer.innerHTML = '';
       items.forEach((item, index) => {
         const card = document.createElement('div');
-        card.className = 'item-card';
-        card.style.animationDelay = `${index * 0.1}s`;
+        card.className = isSuccess ? 'item-card success-card' : 'item-card';
         
+        var statusText = isSuccess ? "COLLECTED" : "PENDING";
+        var pillClass = isSuccess ? "status-pill success-pill" : "status-pill";
+        
+        var statusIcon = isSuccess 
+          ? `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="9" width="3" height="3" fill="currentColor"/><rect x="5" y="12" width="3" height="2" fill="currentColor"/><rect x="8" y="7" width="3" height="3" fill="currentColor"/><rect x="11" y="2" width="3" height="5" fill="currentColor"/></svg>` 
+          : `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="3" y="1" width="10" height="14" rx="5" stroke="currentColor" stroke-width="2" fill="none"/><rect x="7" y="4" width="2" height="4" fill="currentColor"/></svg>`;
+
         card.innerHTML = `
           <div class="card-row">
-            <div class="status-pill">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <rect x="3" y="1" width="10" height="14" rx="5" stroke="#FF6584" stroke-width="2" fill="none"/>
-                <rect x="7" y="4" width="2" height="4" fill="#FF6584"/>
-                <rect x="4" y="8" width="2" height="2" fill="#FF6584"/>
-              </svg>
-              PENDING
-            </div>
+            <div class="${pillClass}">${statusIcon} ${statusText}</div>
           </div>
           <div class="item-name">${item.namaItem}</div>
           <div class="item-meta">
@@ -326,9 +377,7 @@
             </svg>
             ${item.nama}
           </div>
-          <div class="item-meta" style="font-size: 13px; opacity: 0.8;">
-            ID: ${item.noMatrik}
-          </div>
+          <div class="item-meta" style="font-size: 13px; opacity: 0.8;">ID: ${item.noMatrik}</div>
         `;
         listContainer.appendChild(card);
       });
