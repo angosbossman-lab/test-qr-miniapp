@@ -1,68 +1,253 @@
 <!DOCTYPE html>
-<html>
+<html lang="ms">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistem Pengesahan QR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pengesahan Pixel</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
+    /* ==============================================
+       PALET WARNA & TEMA
+    ============================================== */
+    :root {
+      --primary: #6C63FF;       /* Ungu Modern */
+      --accent: #FF6584;        /* Pink Coral */
+      --dark: #2D3436;
+      --light: #FFFFFF;
+      --glass: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.5);
+      --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.1);
+      --pixel-size: 2px; /* Saiz 'piksel' untuk ikon */
+    }
+
+    /* ==============================================
+       BACKGROUND MODERN (GRADIENT MESH)
+    ============================================== */
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: var(--tg-theme-bg-color, #ffffff);
-      color: var(--tg-theme-text-color, #222222);
-      margin: 0; padding: 20px;
+      font-family: 'Outfit', sans-serif;
+      margin: 0; padding: 0;
+      min-height: 100vh;
       display: flex; flex-direction: column;
       align-items: center;
+      
+      /* Gradient Background yang cantik */
+      background: linear-gradient(135deg, #FDFBF7 0%, #E3F2FD 50%, #F3E5F5 100%);
+      background-attachment: fixed;
+      
+      color: var(--dark);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
-    .container { width: 100%; max-width: 400px; }
-    button {
-      width: 100%; padding: 15px; font-size: 16px; font-weight: bold;
-      color: white; background-color: var(--tg-theme-button-color, #2481cc);
-      border: none; border-radius: 10px; cursor: pointer; margin-top: 20px;
+
+    /* Dekorasi Background (Bulat-bulat blur) */
+    .bg-shape {
+      position: fixed; border-radius: 50%; filter: blur(80px); z-index: -1;
     }
-    button:disabled { background-color: #cccccc; cursor: not-allowed; }
-    #profile-card {
-      display: none; margin-top: 20px; padding: 20px;
-      background-color: var(--tg-theme-secondary-bg-color, #f4f4f4);
-      border-radius: 12px; text-align: left; width: 100%;
-      box-sizing: border-box; border-left: 5px solid #4CAF50;
+    .shape-1 { width: 300px; height: 300px; background: #D1C4E9; top: -50px; left: -100px; opacity: 0.6; }
+    .shape-2 { width: 400px; height: 400px; background: #BBDEFB; bottom: -100px; right: -100px; opacity: 0.6; }
+
+    .app-container {
+      width: 100%; max-width: 450px;
+      padding: 25px;
+      box-sizing: border-box;
+      display: flex; flex-direction: column;
     }
-    #profile-card h3 { margin-top: 0; margin-bottom: 15px; font-size: 18px; }
-    #profile-card p { margin: 5px 0; font-size: 15px; }
-    #profile-card .label { font-size: 12px; opacity: 0.6; display: block; margin-top: 10px; }
-    #status-box { margin-top: 20px; text-align: center; font-size: 14px; color: var(--tg-theme-hint-color, #999); }
+
+    /* ==============================================
+       HEADER
+    ============================================== */
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .icon-frame {
+      width: 80px; height: 80px;
+      background: white;
+      border-radius: 24px;
+      margin: 0 auto 15px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 10px 30px rgba(108, 99, 255, 0.2);
+      border: 2px solid rgba(255,255,255,0.8);
+    }
+
+    .title { font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.5px; background: linear-gradient(to right, #6C63FF, #FF6584); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { font-size: 16px; color: #636E72; margin-top: 5px; font-weight: 400; }
+
+    /* ==============================================
+       BUTANG (MODERN PILL)
+    ============================================== */
+    .btn-main {
+      width: 100%;
+      padding: 18px;
+      font-size: 18px; font-weight: 700;
+      color: white;
+      background: var(--primary);
+      border: none; border-radius: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-main:active { transform: scale(0.96); box-shadow: 0 5px 10px rgba(108, 99, 255, 0.2); }
+    .btn-main:disabled { background: #B2BEC3; box-shadow: none; cursor: not-allowed; }
+
+    .btn-collect {
+      background: var(--accent);
+      box-shadow: 0 10px 20px rgba(255, 101, 132, 0.3);
+      margin-top: 20px;
+      display: none;
+    }
+
+    /* ==============================================
+       KAD ITEM (GLASSMORPHISM)
+    ============================================== */
+    #list-container { width: 100%; margin-top: 20px; }
+
+    .item-card {
+      background: var(--glass);
+      backdrop-filter: blur(12px); /* Kesannya Kaca */
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+      animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    /* Strip Warna di tepi kad */
+    .item-card::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 6px; background: var(--accent);
+    }
+
+    .card-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .status-pill {
+      background: rgba(255, 101, 132, 0.15);
+      color: var(--accent);
+      padding: 6px 12px;
+      border-radius: 50px;
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .item-name {
+      font-size: 20px; font-weight: 800;
+      color: var(--dark);
+      margin: 5px 0;
+    }
+    
+    .item-meta {
+      font-size: 15px; color: #636E72;
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 5px;
+    }
+
+    /* ==============================================
+       STYLE UNTUK IKON PIXEL (SVG)
+    ============================================== */
+    .pixel-icon { width: 24px; height: 24px; display: block; }
+    .large-pixel-icon { width: 40px; height: 40px; display: block; }
+
+    /* ==============================================
+       ANIMASI
+    ============================================== */
+    @keyframes slideIn { 
+      from { opacity: 0; transform: translateY(20px) scale(0.9); } 
+      to { opacity: 1; transform: translateY(0) scale(1); } 
+    }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h3>🔍 Pengesahan Peserta</h3>
-    <div id="status-box">Tekan butang di bawah untuk imbas.</div>
-    <button id="startScan">IMBAS QR</button>
+  <!-- Dekorasi Background -->
+  <div class="bg-shape shape-1"></div>
+  <div class="bg-shape shape-2"></div>
+
+  <div class="app-container">
     
-    <div id="profile-card">
-      <h3 id="card-title">Maklumat Peserta</h3>
-      <span class="label">NO MATRIK</span><p id="res-matrik"><b>-</b></p>
-      <span class="label">NAMA</span><p id="res-nama"><b>-</b></p>
-      <span class="label">BAHAGIAN</span><p id="res-bahagian"><b>-</b></p>
+    <!-- HEADER -->
+    <div class="header">
+      <div class="icon-frame">
+        <!-- Pixel Icon: Box/Package -->
+        <svg class="large-pixel-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="4" width="14" height="10" fill="#6C63FF"/>
+          <rect x="3" y="6" width="10" height="2" fill="white"/>
+          <rect x="1" y="2" width="14" height="2" fill="#8C85FF"/>
+          <rect x="7" y="8" width="2" height="6" fill="#5A52D9"/>
+        </svg>
+      </div>
+      <h1 class="title">Item Checker</h1>
+      <div class="subtitle" id="subtitle-text">Tekan butang untuk imbas</div>
     </div>
+
+    <!-- BUTANG UTAMA -->
+    <button id="scanBtn" class="btn-main" onclick="openScanner()">
+      <!-- Pixel Icon: Camera -->
+      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="5" width="14" height="9" rx="2" fill="white"/>
+        <rect x="4" y="3" width="8" height="2" fill="white"/>
+        <rect x="5" y="7" width="6" height="5" rx="3" fill="#6C63FF"/>
+        <rect x="7" y="9" width="2" height="2" fill="white"/>
+      </svg>
+      IMBAS QR
+    </button>
+
+    <!-- KAWASAN SENARAI -->
+    <div id="list-container"></div>
+
+    <!-- BUTANG COLLECTED -->
+    <button id="collectBtn" class="btn-main btn-collect" onclick="updateStatus()">
+      <!-- Pixel Icon: Checkmark -->
+      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="9" width="3" height="3" fill="white"/>
+        <rect x="5" y="12" width="3" height="2" fill="white"/>
+        <rect x="8" y="7" width="3" height="3" fill="white"/>
+        <rect x="11" y="2" width="3" height="5" fill="white"/>
+      </svg>
+      COLLECTED
+    </button>
+
   </div>
 
   <script>
     // ==============================================
     // KONFIGURASI
     // ==============================================
-    // PASTIKAN ANDA TUKAR INI DENGAN URL WEB APP BARU
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHx2h0emqzLSjtNN0JMv69RMLm4CbckbwqQHkIjeCB4nDIh_bPOpACl7uthAh1IBHh/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyOETjSWdXoIoLpT72UcNTk0niWDQUB2JFP02t6i7IJkgkKQcPsOU21MjXgtGz-B3Be/exec';
     
-    const statusBox = document.getElementById('status-box');
-    const startBtn = document.getElementById('startScan');
-    const profileCard = document.getElementById('profile-card');
+    const subtitleText = document.getElementById('subtitle-text');
+    const scanBtn = document.getElementById('scanBtn');
+    const listContainer = document.getElementById('list-container');
+    const collectBtn = document.getElementById('collectBtn');
 
-    // Init Telegram
+    var rowsToUpdate = [];
+
+    // ==============================================
+    // TELEGRAM SETUP
+    // ==============================================
     if (!window.Telegram || !window.Telegram.WebApp) {
-      statusBox.innerHTML = "⚠️ <b>Ralat:</b> Buka dalam Telegram.";
-      startBtn.disabled = true;
+      alert("Buka dalam Telegram.");
       throw new Error("Bukan Telegram");
     }
 
@@ -70,74 +255,143 @@
     tg.ready();
     tg.expand();
 
-    // Check URL configuration
-    if (SCRIPT_URL === 'MASUKKAN_URL_WEB_APP_ANDA_DISINI' || SCRIPT_URL === '') {
-      statusBox.innerHTML = "⚠️ <b>Ralat:</b> URL Script kosong.";
-      startBtn.disabled = true;
+    // Check URL
+    if (!SCRIPT_URL || SCRIPT_URL === 'MASUKKAN_URL_WEB_APP_ANDA_DISINI') {
+      subtitleText.innerText = "⚠️ URL Script belum diset.";
+      scanBtn.disabled = true;
     }
 
-    startBtn.onclick = function() {
-      profileCard.style.display = 'none';
-      statusBox.innerText = "Meminta akses kamera...";
-      
+    // ==============================================
+    // LOGIK
+    // ==============================================
+
+    function openScanner() {
+      listContainer.innerHTML = '';
+      collectBtn.style.display = 'none';
+      rowsToUpdate = [];
+
       if (typeof tg.showScanQrPopup === 'function') {
-        tg.showScanQrPopup({ text: 'Imbas Kod QR Peserta' }, function(result) {
+        tg.showScanQrPopup({ text: 'Imbas QR Item' }, (result) => {
           tg.closeScanQrPopup();
-          if (result) {
-            verifyWithSheet(result);
-          }
+          if (result) verifyData(result);
         });
       } else {
-        statusBox.innerText = "⚠️ Scanner tidak disokong.";
+        subtitleText.innerText = "Scanner tidak disokong.";
       }
-    };
+    }
 
-    // ==============================================
-    // FUNGSI SEMAK DATA (METHOD GET)
-    // ==============================================
-    async function verifyWithSheet(qrData) {
-      statusBox.innerText = "Menyambung ke server...";
-      startBtn.disabled = true;
+    async function verifyData(qrData) {
+      setLoading(true);
+      subtitleText.innerText = "Memproses...";
 
       try {
-        // KITA TUKAR KEPADA GET REQUEST
-        // Data dihantar sebagai parameter URL: ?qrData=xxxxx
-        const urlWithParam = SCRIPT_URL + '?qrData=' + encodeURIComponent(qrData);
+        const res = await fetch(SCRIPT_URL + '?qrData=' + encodeURIComponent(qrData));
+        const data = await res.json();
 
-        const response = await fetch(urlWithParam);
-        
-        if (!response.ok) {
-          throw new Error('Server error: ' + response.status);
-        }
-
-        const result = await response.json();
-
-        if (result.status === 'found') {
-          statusBox.innerText = "✅ Pengesahan berjaya.";
-          showProfile(result.details);
-          tg.HapticFeedback.notificationOccurred('success');
-        } else if (result.status === 'error') {
-          statusBox.innerHTML = "<span style='color:red'>❌ Ralat: " + result.message + "</span>";
-        } else {
-          statusBox.innerHTML = "<span style='color:orange'>⚠️ " + result.message + "</span>";
+        if (data.status === 'found_pending') {
+          const count = data.list.length;
+          subtitleText.innerText = `Dijumpai ${count} item.`;
+          
+          rowsToUpdate = data.list.map(item => item.rowIndex);
+          renderList(data.list);
+          
+          collectBtn.style.display = 'flex';
           tg.HapticFeedback.notificationOccurred('warning');
-        }
 
-      } catch (error) {
-        statusBox.innerHTML = "<span style='color:red'>❌ Gagal sambung: " + error.message + "</span>";
+        } else if (data.status === 'not_found') {
+          subtitleText.innerText = "✅ Tiada item pending.";
+          tg.HapticFeedback.notificationOccurred('success');
+        } else {
+          subtitleText.innerText = "❌ " + data.message;
+        }
+      } catch (err) {
+        subtitleText.innerText = "❌ Ralat: " + err.message;
       } finally {
-        startBtn.disabled = false;
+        setLoading(false);
       }
     }
 
-    function showProfile(data) {
-      document.getElementById('res-matrik').innerText = data.noMatrik;
-      document.getElementById('res-nama').innerText = data.nama;
-      document.getElementById('res-bahagian').innerText = data.bahagian;
-      document.getElementById('card-title').innerText = "✅ Pengesahan Berjaya";
-      document.getElementById('card-title').style.color = "#4CAF50";
-      profileCard.style.display = 'block';
+    async function updateStatus() {
+      if (rowsToUpdate.length === 0) return;
+      setLoading(true);
+      subtitleText.innerText = "Menyimpan...";
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rows: rowsToUpdate })
+        });
+        const data = await res.json();
+
+        if (data.status === 'success') {
+          subtitleText.innerText = "✅ Berjaya dikemaskini!";
+          listContainer.innerHTML = '';
+          collectBtn.style.display = 'none';
+          rowsToUpdate = [];
+          tg.HapticFeedback.notificationOccurred('success');
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (err) {
+        subtitleText.innerText = "❌ Gagal: " + err.message;
+      } finally {
+        setLoading(false);
+      }
     }
+
+    function renderList(items) {
+      listContainer.innerHTML = '';
+      items.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.style.animationDelay = `${index * 0.1}s`;
+        
+        card.innerHTML = `
+          <div class="card-row">
+            <div class="status-pill">
+              <!-- Pixel Icon: Clock -->
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="3" y="1" width="10" height="14" rx="5" stroke="#FF6584" stroke-width="2" fill="none"/>
+                <rect x="7" y="4" width="2" height="4" fill="#FF6584"/>
+                <rect x="4" y="8" width="2" height="2" fill="#FF6584"/>
+              </svg>
+              PENDING
+            </div>
+          </div>
+          <div class="item-name">${item.namaItem}</div>
+          <div class="item-meta">
+            <!-- Pixel Icon: User -->
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+               <rect x="6" y="2" width="4" height="4" fill="#636E72"/>
+               <rect x="4" y="8" width="8" height="2" fill="#636E72"/>
+               <rect x="3" y="10" width="2" height="4" fill="#636E72"/>
+               <rect x="11" y="10" width="2" height="4" fill="#636E72"/>
+            </svg>
+            ${item.nama}
+          </div>
+          <div class="item-meta" style="font-size: 13px; opacity: 0.8;">
+            ID: ${item.noMatrik}
+          </div>
+        `;
+        listContainer.appendChild(card);
+      });
+    }
+
+    function setLoading(isLoading) {
+      scanBtn.disabled = isLoading;
+      collectBtn.disabled = isLoading;
+      if (isLoading) {
+        scanBtn.innerHTML = `<svg class="pixel-icon" style="animation: spin 1s linear infinite" viewBox="0 0 16 16"><rect x="7" y="1" width="2" height="6" fill="white"/><rect x="3" y="3" width="2" height="2" fill="white" opacity="0.5"/></svg> MEMPROSES...`;
+      } else {
+        scanBtn.innerHTML = `<svg class="pixel-icon" viewBox="0 0 16 16"><rect x="1" y="5" width="14" height="9" rx="2" fill="white"/><rect x="4" y="3" width="8" height="2" fill="white"/><rect x="5" y="7" width="6" height="5" rx="3" fill="#6C63FF"/><rect x="7" y="9" width="2" height="2" fill="white"/></svg> IMBAS QR`;
+      }
+    }
+
+    const style = document.createElement('style');
+    style.innerHTML = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+    document.head.appendChild(style);
+
   </script>
 </body>
 </html>
