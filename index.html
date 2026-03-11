@@ -133,18 +133,6 @@
     .item-name { font-size: 20px; font-weight: 800; color: var(--dark); margin: 5px 0; }
     .item-meta { font-size: 15px; color: #636E72; display: flex; align-items: center; gap: 8px; margin-top: 5px; }
 
-    /* Style untuk Debug Info Box */
-    .debug-box {
-      margin-top: 15px;
-      padding: 15px;
-      background: rgba(0,0,0,0.05);
-      border-radius: 10px;
-      text-align: left;
-      font-size: 12px;
-      border: 1px dashed #B2BEC3;
-    }
-    .debug-box b { color: var(--primary); }
-
     .pixel-icon { width: 24px; height: 24px; display: block; }
     .large-pixel-icon { width: 40px; height: 40px; display: block; }
 
@@ -199,7 +187,7 @@
     // ==============================================
     // KONFIGURASI
     // ==============================================
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMLb0Bmy0cN6SPaZepawx-Y3dYGlEMaLDntr2au9cKtYg8YRltMjqFSNHT5xSZrHxr/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-9SyIHEDYrt3zzMlt_9ghK6-RwpBZzrCb5cY4FuNjykdGWpLIBUxAhn3GJizxgSSO/exec';
     
     const subtitleText = document.getElementById('subtitle-text');
     const scanBtn = document.getElementById('scanBtn');
@@ -221,7 +209,7 @@
     tg.expand();
 
     if (!SCRIPT_URL || SCRIPT_URL === 'MASUKKAN_URL_WEB_APP_ANDA_DISINI') {
-      subtitleText.innerHTML = "⚠️ <b>RALAT:</b> URL Script belum diset di dalam kod HTML.";
+      subtitleText.innerHTML = "⚠️ <b>RALAT:</b> URL Script belum diset.";
       scanBtn.disabled = true;
     }
 
@@ -250,6 +238,7 @@
       subtitleText.innerText = "Memproses data...";
 
       try {
+        // HANTAR GET REQUEST (CARI)
         const res = await fetch(SCRIPT_URL + '?qrData=' + encodeURIComponent(qrData));
         const data = await res.json();
 
@@ -264,19 +253,8 @@
           tg.HapticFeedback.notificationOccurred('warning');
 
         } else if (data.status === 'not_found') {
-          // --- KOD DEBUG (PAPARAN OTOMATIS) ---
-          let debugMsg = "❌ <b>Tiada item pending dijumpai.</b><br>";
-          // Jika server hantar info debug, tunjukkan
-          if (data.debug_info) {
-            debugMsg += "<div class='debug-box'>";
-            debugMsg += "<b>Server Cari Tarikh:</b> " + data.debug_info.server_date + "<br>";
-            debugMsg += "<b>Matrik Diterima:</b> " + data.debug_info.scan_matrik + "<br>";
-            debugMsg += "<b>Data Row 1 Sheet:</b> " + data.debug_info.first_row_data;
-            debugMsg += "</div>";
-          }
+          let debugMsg = "❌ <b>Tiada item pending.</b>";
           subtitleText.innerHTML = debugMsg;
-          // ------------------------------------
-          
           tg.HapticFeedback.notificationOccurred('error');
         } else {
           subtitleText.innerText = "❌ " + data.message;
@@ -288,17 +266,20 @@
       }
     }
 
+    // ==============================================
+    // FUNGSI UPDATE (TUKAR KE GET)
+    // ==============================================
     async function updateStatus() {
       if (rowsToUpdate.length === 0) return;
       setLoading(true);
       subtitleText.innerText = "Menyimpan...";
 
       try {
-        const res = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ rows: rowsToUpdate })
-        });
+        // GABUNGKAN INDEX BARIS MENJADI STRING (contoh: "2,5,8")
+        var rowsParam = rowsToUpdate.join(',');
+        
+        // HANTAR GET REQUEST DENGAN ACTION=UPDATE
+        const res = await fetch(SCRIPT_URL + '?action=update&rows=' + rowsParam);
         const data = await res.json();
 
         if (data.status === 'success') {
