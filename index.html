@@ -40,7 +40,7 @@
     .banner-subtitle { font-size: 12px; color: rgba(255,255,255,0.9); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
     .subtitle { font-size: 16px; color: #636E72; margin-top: 5px; font-weight: 400; line-height: 1.4; }
 
-    /* --- TAMBAHAN STYLING UNTUK INPUT --- */
+    /* --- STYLING UNTUK INPUT (DIPERBAIKI) --- */
     .input-card {
       background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 15px;
@@ -57,12 +57,15 @@
     }
     .input-field:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(108,99,255,0.1); }
     
-    .search-row { display: flex; gap: 10px; }
+    /* PEMBAETAN: align-items: flex-end supaya butang sejajar dengan input */
+    .search-row { display: flex; gap: 10px; align-items: flex-end; }
     .search-row .input-group { margin-bottom: 0; }
+    
+    /* PEMBAETAN: height: 100% dihapuskan supaya butang tidak terlalu panjang */
     .btn-search {
       padding: 12px 16px; background: var(--dark); color: white; border: none; border-radius: 10px;
       font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: transform 0.2s, opacity 0.2s; height: 100%;
+      transition: transform 0.2s, opacity 0.2s; flex-shrink: 0; 
     }
     .btn-search:active { transform: scale(0.95); }
     /* ------------------------------------- */
@@ -130,7 +133,7 @@
       <div class="subtitle" id="subtitle-text">Sistem Pengedaran Pintar</div>
     </div>
 
-    <!-- BAHAGIAN BARU: INPUT TARIKH & MANUAL -->
+    <!-- BAHAGIAN INPUT -->
     <div class="input-card">
       <div class="input-row">
         <div class="input-group">
@@ -143,7 +146,7 @@
         </div>
       </div>
       <div class="search-row">
-        <div class="input-group" style="flex: 1;">
+        <div class="input-group">
           <label class="input-label">No. Matrik / ID</label>
           <input type="text" id="manualInput" class="input-field" placeholder="Taip di sini...">
         </div>
@@ -152,7 +155,7 @@
         </button>
       </div>
     </div>
-    <!-- TAMAT BAHAGIAN BARU -->
+    <!-- TAMAT BAHAGIAN INPUT -->
 
     <div id="debugContainer" class="debug-container">
       <span>Mode Debug</span>
