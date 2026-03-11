@@ -18,29 +18,21 @@
       --glass: rgba(255, 255, 255, 0.85);
       --glass-border: rgba(255, 255, 255, 0.5);
       --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.1);
-      --pixel-size: 2px; /* Saiz 'piksel' untuk ikon */
     }
 
-    /* ==============================================
-       BACKGROUND MODERN (GRADIENT MESH)
-    ============================================== */
     body {
       font-family: 'Outfit', sans-serif;
       margin: 0; padding: 0;
       min-height: 100vh;
       display: flex; flex-direction: column;
       align-items: center;
-      
-      /* Gradient Background yang cantik */
       background: linear-gradient(135deg, #FDFBF7 0%, #E3F2FD 50%, #F3E5F5 100%);
       background-attachment: fixed;
-      
       color: var(--dark);
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
 
-    /* Dekorasi Background (Bulat-bulat blur) */
     .bg-shape {
       position: fixed; border-radius: 50%; filter: blur(80px); z-index: -1;
     }
@@ -54,9 +46,6 @@
       display: flex; flex-direction: column;
     }
 
-    /* ==============================================
-       HEADER
-    ============================================== */
     .header {
       text-align: center;
       margin-bottom: 30px;
@@ -80,11 +69,8 @@
     }
 
     .title { font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.5px; background: linear-gradient(to right, #6C63FF, #FF6584); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .subtitle { font-size: 16px; color: #636E72; margin-top: 5px; font-weight: 400; }
+    .subtitle { font-size: 16px; color: #636E72; margin-top: 5px; font-weight: 400; line-height: 1.4; }
 
-    /* ==============================================
-       BUTANG (MODERN PILL)
-    ============================================== */
     .btn-main {
       width: 100%;
       padding: 18px;
@@ -96,10 +82,8 @@
       display: flex; align-items: center; justify-content: center; gap: 12px;
       box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
       transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
     }
-    .btn-main:active { transform: scale(0.96); box-shadow: 0 5px 10px rgba(108, 99, 255, 0.2); }
+    .btn-main:active { transform: scale(0.96); }
     .btn-main:disabled { background: #B2BEC3; box-shadow: none; cursor: not-allowed; }
 
     .btn-collect {
@@ -109,14 +93,11 @@
       display: none;
     }
 
-    /* ==============================================
-       KAD ITEM (GLASSMORPHISM)
-    ============================================== */
     #list-container { width: 100%; margin-top: 20px; }
 
     .item-card {
       background: var(--glass);
-      backdrop-filter: blur(12px); /* Kesannya Kaca */
+      backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--glass-border);
       border-radius: 20px;
@@ -128,7 +109,6 @@
       animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     
-    /* Strip Warna di tepi kad */
     .item-card::before {
       content: '';
       position: absolute; left: 0; top: 0; bottom: 0;
@@ -147,49 +127,39 @@
       border-radius: 50px;
       font-size: 12px; font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
       display: flex; align-items: center; gap: 6px;
     }
 
-    .item-name {
-      font-size: 20px; font-weight: 800;
-      color: var(--dark);
-      margin: 5px 0;
-    }
-    
-    .item-meta {
-      font-size: 15px; color: #636E72;
-      display: flex; align-items: center; gap: 8px;
-      margin-top: 5px;
-    }
+    .item-name { font-size: 20px; font-weight: 800; color: var(--dark); margin: 5px 0; }
+    .item-meta { font-size: 15px; color: #636E72; display: flex; align-items: center; gap: 8px; margin-top: 5px; }
 
-    /* ==============================================
-       STYLE UNTUK IKON PIXEL (SVG)
-    ============================================== */
+    /* Style untuk Debug Info Box */
+    .debug-box {
+      margin-top: 15px;
+      padding: 15px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 10px;
+      text-align: left;
+      font-size: 12px;
+      border: 1px dashed #B2BEC3;
+    }
+    .debug-box b { color: var(--primary); }
+
     .pixel-icon { width: 24px; height: 24px; display: block; }
     .large-pixel-icon { width: 40px; height: 40px; display: block; }
 
-    /* ==============================================
-       ANIMASI
-    ============================================== */
-    @keyframes slideIn { 
-      from { opacity: 0; transform: translateY(20px) scale(0.9); } 
-      to { opacity: 1; transform: translateY(0) scale(1); } 
-    }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
 
-  <!-- Dekorasi Background -->
   <div class="bg-shape shape-1"></div>
   <div class="bg-shape shape-2"></div>
 
   <div class="app-container">
     
-    <!-- HEADER -->
     <div class="header">
       <div class="icon-frame">
-        <!-- Pixel Icon: Box/Package -->
         <svg class="large-pixel-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="1" y="4" width="14" height="10" fill="#6C63FF"/>
           <rect x="3" y="6" width="10" height="2" fill="white"/>
@@ -201,9 +171,7 @@
       <div class="subtitle" id="subtitle-text">Tekan butang untuk imbas</div>
     </div>
 
-    <!-- BUTANG UTAMA -->
     <button id="scanBtn" class="btn-main" onclick="openScanner()">
-      <!-- Pixel Icon: Camera -->
       <svg class="pixel-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="1" y="5" width="14" height="9" rx="2" fill="white"/>
         <rect x="4" y="3" width="8" height="2" fill="white"/>
@@ -213,12 +181,9 @@
       IMBAS QR
     </button>
 
-    <!-- KAWASAN SENARAI -->
     <div id="list-container"></div>
 
-    <!-- BUTANG COLLECTED -->
     <button id="collectBtn" class="btn-main btn-collect" onclick="updateStatus()">
-      <!-- Pixel Icon: Checkmark -->
       <svg class="pixel-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="2" y="9" width="3" height="3" fill="white"/>
         <rect x="5" y="12" width="3" height="2" fill="white"/>
@@ -234,7 +199,7 @@
     // ==============================================
     // KONFIGURASI
     // ==============================================
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyOETjSWdXoIoLpT72UcNTk0niWDQUB2JFP02t6i7IJkgkKQcPsOU21MjXgtGz-B3Be/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMLb0Bmy0cN6SPaZepawx-Y3dYGlEMaLDntr2au9cKtYg8YRltMjqFSNHT5xSZrHxr/exec';
     
     const subtitleText = document.getElementById('subtitle-text');
     const scanBtn = document.getElementById('scanBtn');
@@ -255,20 +220,20 @@
     tg.ready();
     tg.expand();
 
-    // Check URL
     if (!SCRIPT_URL || SCRIPT_URL === 'MASUKKAN_URL_WEB_APP_ANDA_DISINI') {
-      subtitleText.innerText = "⚠️ URL Script belum diset.";
+      subtitleText.innerHTML = "⚠️ <b>RALAT:</b> URL Script belum diset di dalam kod HTML.";
       scanBtn.disabled = true;
     }
 
     // ==============================================
-    // LOGIK
+    // LOGIK UTAMA
     // ==============================================
 
     function openScanner() {
       listContainer.innerHTML = '';
       collectBtn.style.display = 'none';
       rowsToUpdate = [];
+      subtitleText.innerText = "Tekan butang untuk imbas";
 
       if (typeof tg.showScanQrPopup === 'function') {
         tg.showScanQrPopup({ text: 'Imbas QR Item' }, (result) => {
@@ -282,7 +247,7 @@
 
     async function verifyData(qrData) {
       setLoading(true);
-      subtitleText.innerText = "Memproses...";
+      subtitleText.innerText = "Memproses data...";
 
       try {
         const res = await fetch(SCRIPT_URL + '?qrData=' + encodeURIComponent(qrData));
@@ -290,7 +255,7 @@
 
         if (data.status === 'found_pending') {
           const count = data.list.length;
-          subtitleText.innerText = `Dijumpai ${count} item.`;
+          subtitleText.innerText = `✅ Dijumpai ${count} item pending.`;
           
           rowsToUpdate = data.list.map(item => item.rowIndex);
           renderList(data.list);
@@ -299,13 +264,25 @@
           tg.HapticFeedback.notificationOccurred('warning');
 
         } else if (data.status === 'not_found') {
-          subtitleText.innerText = "✅ Tiada item pending.";
-          tg.HapticFeedback.notificationOccurred('success');
+          // --- KOD DEBUG (PAPARAN OTOMATIS) ---
+          let debugMsg = "❌ <b>Tiada item pending dijumpai.</b><br>";
+          // Jika server hantar info debug, tunjukkan
+          if (data.debug_info) {
+            debugMsg += "<div class='debug-box'>";
+            debugMsg += "<b>Server Cari Tarikh:</b> " + data.debug_info.server_date + "<br>";
+            debugMsg += "<b>Matrik Diterima:</b> " + data.debug_info.scan_matrik + "<br>";
+            debugMsg += "<b>Data Row 1 Sheet:</b> " + data.debug_info.first_row_data;
+            debugMsg += "</div>";
+          }
+          subtitleText.innerHTML = debugMsg;
+          // ------------------------------------
+          
+          tg.HapticFeedback.notificationOccurred('error');
         } else {
           subtitleText.innerText = "❌ " + data.message;
         }
       } catch (err) {
-        subtitleText.innerText = "❌ Ralat: " + err.message;
+        subtitleText.innerText = "❌ Ralat Sambungan: " + err.message;
       } finally {
         setLoading(false);
       }
@@ -325,7 +302,7 @@
         const data = await res.json();
 
         if (data.status === 'success') {
-          subtitleText.innerText = "✅ Berjaya dikemaskini!";
+          subtitleText.innerHTML = "✅ <b>Berjaya dikemaskini!</b>";
           listContainer.innerHTML = '';
           collectBtn.style.display = 'none';
           rowsToUpdate = [];
@@ -350,7 +327,6 @@
         card.innerHTML = `
           <div class="card-row">
             <div class="status-pill">
-              <!-- Pixel Icon: Clock -->
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                 <rect x="3" y="1" width="10" height="14" rx="5" stroke="#FF6584" stroke-width="2" fill="none"/>
                 <rect x="7" y="4" width="2" height="4" fill="#FF6584"/>
@@ -361,7 +337,6 @@
           </div>
           <div class="item-name">${item.namaItem}</div>
           <div class="item-meta">
-            <!-- Pixel Icon: User -->
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                <rect x="6" y="2" width="4" height="4" fill="#636E72"/>
                <rect x="4" y="8" width="8" height="2" fill="#636E72"/>
