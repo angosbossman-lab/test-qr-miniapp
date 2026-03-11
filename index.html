@@ -42,6 +42,9 @@
   </div>
 
   <script>
+    // URL Google Apps Script Web App
+    const WEBAPP_URL = "https://script.google.com/macros/s/WEB_APP_ID/exec"; // Ganti WEB_APP_ID
+
     function log(msg, type) {
       var box = document.getElementById('log-box');
       var time = new Date().toLocaleTimeString();
@@ -67,10 +70,6 @@
       log('Telegram dikesan: ' + tg.platform);
       log('Versi WebApp: ' + tg.version);
 
-      // --- LOGIK BARU (FORCE MODE) ---
-      // Kita tidak check platform 'android'/'ios'.
-      // Kita hanya check sama ada fungsi showScanQrPopup ADA atau TIDAK.
-      
       var btn = document.getElementById('startScan');
 
       if (typeof tg.showScanQrPopup === 'function') {
@@ -83,6 +82,14 @@
           try {
             tg.showScanQrPopup({ text: 'Imbas Kod QR' }, function(result) {
               log('✅ BERJAYA! Hasil: ' + result, 'success');
+
+              // Hantar data scan ke Google Sheet
+              const userId = tg.initData?.user?.id || 'unknown';
+              fetch(WEBAPP_URL + "?chat_id=" + userId + "&qr=" + encodeURIComponent(result))
+              .then(res => res.text())
+              .then(txt => log('📤 Data dihantar ke Google Sheet: ' + txt, 'success'))
+              .catch(err => log('❌ Gagal hantar ke Sheet: ' + err.message, 'error'));
+
               tg.closeScanQrPopup();
             });
           } catch (e) {
@@ -102,7 +109,3 @@
   </script>
 </body>
 </html>
-</script>
-</body>
-</html>
-
