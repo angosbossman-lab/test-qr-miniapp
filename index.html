@@ -24,7 +24,7 @@
 
     .app-container { width: 100%; max-width: 450px; padding: 25px; padding-top: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
 
-    .header { text-align: center; margin-bottom: 20px; animation: float 3s ease-in-out infinite; width: 100%; }
+    .header { text-align: center; margin-bottom: 20px; width: 100%; }
     @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
 
     .banner-frame {
@@ -38,7 +38,22 @@
     .banner-text { text-align: left; position: relative; z-index: 1; flex-grow: 1; }
     .banner-title { font-size: 28px; font-weight: 800; color: white; margin: 0; line-height: 1; letter-spacing: 1px; }
     .banner-subtitle { font-size: 13px; color: rgba(255,255,255,0.9); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
-    .subtitle { font-size: 16px; color: #636E72; margin-top: 5px; font-weight: 400; line-height: 1.4; }
+    
+    /* PERUBAHAN DI SINI: text-align: center ditambah */
+    .subtitle { font-size: 16px; color: #636E72; margin-top: 5px; font-weight: 400; line-height: 1.4; text-align: center; }
+
+    /* --- TAB NAVIGATION --- */
+    .tab-nav { display: flex; gap: 10px; margin-bottom: 15px; width: 100%; }
+    .tab-btn {
+      flex: 1; padding: 12px; border: none; background: rgba(255,255,255,0.5); border-radius: 12px;
+      font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 14px; color: #636E72; cursor: pointer;
+      transition: all 0.2s; border: 1px solid transparent;
+    }
+    .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(108,99,255,0.3); }
+    
+    .section-box { display: none; animation: fadeIn 0.3s; }
+    .section-box.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
     /* --- STYLING UNTUK INPUT --- */
     .input-card {
@@ -61,6 +76,7 @@
       transition: all 0.2s;
     }
     .input-field:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(108,99,255,0.1); }
+    .input-field:disabled { background: #f0f0f0; color: #555; cursor: not-allowed; opacity: 0.8; }
     
     .search-row { display: flex; gap: 10px; align-items: flex-end; }
     .search-row .input-group { margin-bottom: 0; }
@@ -71,7 +87,6 @@
       transition: transform 0.2s, opacity 0.2s; flex-shrink: 0;
     }
     .btn-search:active { transform: scale(0.95); }
-    /* ------------------------------------- */
 
     .btn-main {
       width: 100%; padding: 18px; font-size: 18px; font-weight: 700; color: white; background: var(--primary);
@@ -81,8 +96,10 @@
     .btn-main:active { transform: scale(0.96); }
     .btn-main:disabled { background: #B2BEC3; box-shadow: none; cursor: not-allowed; }
     .btn-collect { background: var(--success); box-shadow: 0 10px 20px rgba(76,175,80,0.3); margin-top: 20px; display: none; }
+    .btn-payment { background: var(--accent); box-shadow: 0 10px 20px rgba(255,101,132,0.3); }
 
     #list-container { width: 100%; margin-top: 20px; }
+    #payment-list-container { width: 100%; margin-bottom: 15px; }
 
     .item-card {
       background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -105,47 +122,37 @@
     .item-meta { font-size: 15px; color: #636E72; display: flex; align-items: center; gap: 8px; margin-top: 5px; }
     .pixel-icon { width: 24px; height: 24px; display: block; }
     
-    /* --- DEBUG CONTAINER (BAHAGIAN BAWAH) --- */
+    /* --- QR & FILE UPLOAD STYLES --- */
+    .qr-section { text-align: center; margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.5); border-radius: 15px; }
+    .qr-image { width: 200px; height: 200px; margin: 0 auto 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); object-fit: cover; }
+    .btn-download { background: var(--dark); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; font-size: 14px; }
+    
+    .file-upload-area {
+      border: 2px dashed rgba(108,99,255,0.3); border-radius: 12px; padding: 20px;
+      text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(108,99,255,0.05);
+    }
+    .file-upload-area:hover { border-color: var(--primary); background: rgba(108,99,255,0.1); }
+    .file-upload-area img { max-width: 100%; max-height: 150px; border-radius: 8px; margin-top: 10px; display: none; }
+
+    .result-box { padding: 20px; border-radius: 15px; margin-top: 15px; text-align: center; display: none; }
+    .result-success { background: rgba(76,175,80,0.1); border: 1px solid var(--success); color: var(--success); }
+    .result-error { background: rgba(255,101,132,0.1); border: 1px solid var(--accent); color: var(--accent); }
+
+    /* --- DEBUG CONTAINER --- */
     .debug-container {
-      display: none; /* Tersembunyi secara default (aktifkan jika staf) */
-      margin-top: 30px; /* Jarak dari butang/hasil atas */
-      padding-top: 20px;
-      border-top: 1px solid rgba(0,0,0,0.1);
-      width: 100%;
-      box-sizing: border-box;
+      display: none; margin-top: 30px; padding-top: 20px;
+      border-top: 1px solid rgba(0,0,0,0.1); width: 100%; box-sizing: border-box;
     }
-    .debug-toggle-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .debug-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: #636E72;
-    }
+    .debug-toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .debug-label { font-size: 14px; font-weight: 600; color: #636E72; }
     .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 34px; }
     .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
     input:checked + .slider { background-color: var(--dark); }
     input:checked + .slider:before { transform: translateX(18px); }
-
-    /* Kotak hitam output (tersembunyi jika switch off) */
-    .debug-content {
-      display: none; 
-      background-color: #1e1e1e; color: #ffffff;
-      border-radius: 10px; padding: 15px;
-      font-family: 'Courier New', Courier, monospace; font-size: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid #333;
-      margin-top: 10px;
-    }
-    .debug-output {
-      color: #00ff00; /* Teks hijau */
-      line-height: 1.5; white-space: pre-wrap;
-    }
-    /* ---------------------------------------- */
+    .debug-content { display: none; background-color: #1e1e1e; color: #ffffff; border-radius: 10px; padding: 15px; font-family: 'Courier New', Courier, monospace; font-size: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid #333; margin-top: 10px; }
+    .debug-output { color: #00ff00; line-height: 1.5; white-space: pre-wrap; }
 
     @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   </style>
@@ -167,105 +174,170 @@
           <div class="banner-subtitle">MANAGEMENT SYSTEM</div>
         </div>
       </div>
-      <div class="subtitle" id="subtitle-text">Sistem Pengedaran Pintar</div>
     </div>
 
-    <!-- BAHAGIAN INPUT -->
-    <div class="input-card">
-      <div class="input-row">
-        <div class="input-group">
-          <label class="input-label">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            Tarikh Mula
-          </label>
-          <input type="date" id="startDate" class="input-field">
+    <!-- TAB NAVIGATION -->
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('kutipan')">Kutipan</button>
+      <button class="tab-btn" onclick="switchTab('bayaran')">Bayaran</button>
+    </div>
+
+    <!-- BAHAGIAN KUTIPAN -->
+    <div id="section-kutipan" class="section-box active">
+      <!-- PERUBAHAN TEXT DI SINI -->
+      <div class="subtitle" id="subtitle-text">Sistem e-Parcel Pintar</div>
+      
+      <div class="input-card">
+        <div class="input-row">
+          <div class="input-group">
+            <label class="input-label">Tarikh Mula</label>
+            <input type="date" id="startDate" class="input-field">
+          </div>
+          <div class="input-group">
+            <label class="input-label">Tarikh Akhir</label>
+            <input type="date" id="endDate" class="input-field">
+          </div>
         </div>
-        <div class="input-group">
-          <label class="input-label">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            Tarikh Akhir
-          </label>
-          <input type="date" id="endDate" class="input-field">
+        <div class="search-row">
+          <div class="input-group">
+            <label class="input-label">No. Matrik / ID</label>
+            <input type="text" id="manualInput" class="input-field" placeholder="Taip di sini...">
+          </div>
+          <button class="btn-search" onclick="manualSearch()" title="Cari">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
         </div>
       </div>
-      <div class="search-row">
-        <div class="input-group">
-          <label class="input-label">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            No. Matrik / ID
+
+      <button id="scanBtn" class="btn-main" onclick="openScanner()">
+        <svg class="pixel-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="5" width="14" height="9" rx="2" fill="white"/><rect x="4" y="3" width="8" height="2" fill="white"/><rect x="5" y="7" width="6" height="5" rx="3" fill="#6C63FF"/><rect x="7" y="9" width="2" height="2" fill="white"/></svg>
+        IMBAS QR
+      </button>
+
+      <div id="list-container"></div>
+
+      <button id="collectBtn" class="btn-main btn-collect" onclick="updateStatus()">
+        <svg class="pixel-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="9" width="3" height="3" fill="white"/><rect x="5" y="12" width="3" height="2" fill="white"/><rect x="8" y="7" width="3" height="3" fill="white"/><rect x="11" y="2" width="3" height="5" fill="white"/></svg>
+        COLLECTED
+      </button>
+
+      <!-- DEBUG CONTAINER -->
+      <div id="debugContainer" class="debug-container">
+        <div class="debug-toggle-row">
+          <span class="debug-label">Mode Debug (Staf Sahaja)</span>
+          <label class="switch">
+            <input type="checkbox" id="debugToggle" onchange="toggleDebugMode()">
+            <span class="slider"></span>
           </label>
-          <input type="text" id="manualInput" class="input-field" placeholder="Taip di sini...">
         </div>
-        <button class="btn-search" onclick="manualSearch()" title="Cari">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        </button>
+        <div id="debugContent" class="debug-content">
+          <div id="debugOutput" class="debug-output">Sistem sedia.</div>
+        </div>
       </div>
     </div>
-    <!-- TAMAT BAHAGIAN INPUT -->
 
-    <button id="scanBtn" class="btn-main" onclick="openScanner()">
-      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="5" width="14" height="9" rx="2" fill="white"/><rect x="4" y="3" width="8" height="2" fill="white"/><rect x="5" y="7" width="6" height="5" rx="3" fill="#6C63FF"/><rect x="7" y="9" width="2" height="2" fill="white"/></svg>
-      IMBAS QR
-    </button>
+    <!-- BAHAGIAN BAYARAN -->
+    <div id="section-bayaran" class="section-box">
+       <div class="subtitle">Pembayaran & Resit</div>
+       
+       <!-- QR CODE SECTION -->
+       <div class="qr-section">
+          <!-- GANTIKAN LINK INI DENGAN LINK GAMBAR QR ANDA -->
+          <img id="qrImage" src="https://via.placeholder.com/250?text=DuitNow+QR" alt="DuitNow QR" class="qr-image">
+          <br>
+          <a id="downloadLink" href="https://via.placeholder.com/250?text=DuitNow+QR" download="DuitNow-QR.png" class="btn-download">
+             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+             Muat Turun QR
+          </a>
+       </div>
 
-    <div id="list-container"></div>
+       <!-- SENARAI ITEM DI TAB BAYARAN -->
+       <div id="payment-list-container"></div>
 
-    <button id="collectBtn" class="btn-main btn-collect" onclick="updateStatus()">
-      <svg class="pixel-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="9" width="3" height="3" fill="white"/><rect x="5" y="12" width="3" height="2" fill="white"/><rect x="8" y="7" width="3" height="3" fill="white"/><rect x="11" y="2" width="3" height="5" fill="white"/></svg>
-      COLLECTED
-    </button>
+       <div class="input-card">
+         <div class="input-group" style="margin-bottom:15px;">
+           <label class="input-label">Catatan</label>
+           <input type="text" id="pay-notes" class="input-field" placeholder="Contoh: Nama / No Telefon">
+         </div>
+         <div class="input-group" style="margin-bottom:15px;">
+           <label class="input-label">Jumlah Bayaran (Auto)</label>
+           <input type="text" id="pay-amount" class="input-field" placeholder="RM 0.00" readonly disabled>
+         </div>
+         
+         <label class="input-label">Gambar Resit</label>
+         <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
+           <div id="upload-placeholder">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#6C63FF" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <p style="margin:5px 0 0 0; color:#6C63FF; font-weight:600;">Klik untuk pilih gambar</p>
+           </div>
+           <img id="previewImg" src="#" alt="Preview">
+         </div>
+         <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="previewFile(this)">
+       </div>
 
-    <!-- DEBUG CONTAINER (DI BAWAH SEKALI) -->
-    <div id="debugContainer" class="debug-container">
-      <div class="debug-toggle-row">
-        <span class="debug-label">Mode Debug (Staf Sahaja)</span>
-        <label class="switch">
-          <input type="checkbox" id="debugToggle" onchange="toggleDebugMode()">
-          <span class="slider"></span>
-        </label>
-      </div>
-      <!-- Kotak hitam hanya muncul jika switch ON -->
-      <div id="debugContent" class="debug-content">
-        <div id="debugOutput" class="debug-output">Sistem sedia.</div>
-      </div>
+       <button class="btn-main btn-payment" onclick="submitPayment()">
+         HANTAR RESIT
+       </button>
+       
+       <div id="payment-result" class="result-box"></div>
     </div>
 
   </div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwH_wt3htw_FXu-GPV6Ww9d7MkNB_hXosgNkvUQVskg5NaQXjsuFjTor7bQEtHfdY0/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwqJA6bHnYx0JmO9JHt4-amdIH8Ftud7oVeX0RYjVUCYitxs9xH9o8hjSLnSzkgjxxh/exec';
+    
+    // --- KONFIGURASI QR CODE ---
+    // GANTIKAN LINK INI DENGAN LINK GAMBAR QR CODE ANDA
+    const QR_CODE_URL = 'https://lh3.googleusercontent.com/d/11pXe4tfNjBCJvej5ERvqxui6RmTyCYoW'; 
+
+    // Parcel Elements
     const subtitleText = document.getElementById('subtitle-text');
     const scanBtn = document.getElementById('scanBtn');
     const listContainer = document.getElementById('list-container');
     const collectBtn = document.getElementById('collectBtn');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const manualInput = document.getElementById('manualInput');
     
-    // Rujukan Debug Elements
+    // Payment Elements
+    const payNotes = document.getElementById('pay-notes');
+    const payAmount = document.getElementById('pay-amount');
+    const previewImg = document.getElementById('previewImg');
+    const uploadPlaceholder = document.getElementById('upload-placeholder');
+    const paymentResult = document.getElementById('payment-result');
+    const paymentListContainer = document.getElementById('payment-list-container');
+
+    // QR Elements
+    const qrImage = document.getElementById('qrImage');
+    const downloadLink = document.getElementById('downloadLink');
+
+    // Debug Elements
     const debugContainer = document.getElementById('debugContainer');
     const debugContent = document.getElementById('debugContent');
     const debugOutput = document.getElementById('debugOutput');
     const debugToggle = document.getElementById('debugToggle');
     
-    // Rujukan Input Baru
-    const startDateInput = document.getElementById('startDate');
-    const endDateInput = document.getElementById('endDate');
-    const manualInput = document.getElementById('manualInput');
-
     var rowsToUpdate = [];
     var currentItemList = [];
-    var isDebugMode = false;
     var currentUserId = null;
+    var currentFileBase64 = null;
+    var isDebugMode = false;
 
-    // Init Telegram
-    if (!window.Telegram || !window.Telegram.WebApp) {
-      console.warn("Env bukan Telegram");
-    } else {
+    // Init Telegram & QR
+    if (window.Telegram && window.Telegram.WebApp) {
       const tg = window.Telegram.WebApp;
       tg.ready();
       tg.expand();
       if (tg.initDataUnsafe && tg.initDataUnsafe.user) currentUserId = tg.initDataUnsafe.user.id;
+      if(tg.initDataUnsafe && tg.initDataUnsafe.start_param) payNotes.value = tg.initDataUnsafe.start_param;
     }
 
-    // Set Default Tarikh Hari Ini
+    // Set QR Code Source
+    qrImage.src = QR_CODE_URL;
+    downloadLink.href = QR_CODE_URL;
+
+    // Set Default Dates
     function initDates() {
       const today = new Date();
       const yyyy = today.getFullYear();
@@ -277,35 +349,120 @@
     }
     initDates();
 
-    if (!SCRIPT_URL || SCRIPT_URL === 'MASUKKAN_URL_WEB_APP_ANDA_DISINI') {
-      subtitleText.innerHTML = "⚠️ <b>RALAT:</b> URL Script belum diset.";
-      scanBtn.disabled = true;
+    // --- TAB SWITCHING LOGIC ---
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      document.querySelectorAll('.section-box').forEach(sec => sec.classList.remove('active'));
+      document.getElementById('section-' + tabName).classList.add('active');
+
+      // Jika buka tab Bayaran, update senarai dan harga
+      if (tabName === 'bayaran') {
+        updatePaymentTab();
+      }
     }
 
+    // --- FUNGSI BARU: UPDATE TAB BAYARAN ---
+    function updatePaymentTab() {
+      if (currentItemList.length > 0) {
+        renderList(currentItemList, false, 'payment-list-container');
+      } else {
+        paymentListContainer.innerHTML = `<div style="text-align:center; padding:10px; color:#888; font-size:14px;">Tiada item. Cari di Tab Kutipan dahulu.</div>`;
+      }
+      var total = currentItemList.length * 1.00;
+      payAmount.value = "RM " + total.toFixed(2);
+    }
+
+    // --- DEBUG LOGIC ---
     function toggleDebugMode() { 
       isDebugMode = debugToggle.checked;
-      // Papar atau sembunyikan kotak hitam berdasarkan switch
       debugContent.style.display = isDebugMode ? 'block' : 'none';
-      
-      if (isDebugMode) {
-        debugOutput.innerText = "Debug Mode Diaktifkan...\nMenunggu arahan.";
+      if (isDebugMode) debugOutput.innerText = "Debug Mode Diaktifkan...";
+    }
+
+    // --- PAYMENT LOGIC ---
+    function previewFile(input) {
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          currentFileBase64 = e.target.result;
+          previewImg.src = e.target.result;
+          previewImg.style.display = 'block';
+          uploadPlaceholder.style.display = 'none';
+        }
+        reader.readAsDataURL(input.files[0]);
       }
     }
 
-    // Fungsi untuk tukar format tarikh (HTML Date -> DD/MM/YYYY)
+    async function submitPayment() {
+       var notes = payNotes.value;
+       var amountVal = payAmount.value;
+       var rowsString = rowsToUpdate.join(',');
+       
+       if(currentItemList.length === 0) {
+         alert("Tiada item untuk dibayar. Cari item di Tab Kutipan dahulu.");
+         return;
+       }
+       if(!currentFileBase64) {
+         alert("Sila pilih gambar resit.");
+         return;
+       }
+       
+       paymentResult.style.display = 'block';
+       paymentResult.className = 'result-box';
+       paymentResult.innerHTML = "Memproses resit...";
+       
+       try {
+         var payload = {
+           action: 'upload_receipt',
+           matrik: notes || 'Pelanggan', 
+           amount: amountVal, 
+           imageBase64: currentFileBase64,
+           userId: currentUserId,
+           rows: rowsString
+         };
+         
+         const res = await fetch(SCRIPT_URL, {
+           method: 'POST',
+           body: JSON.stringify(payload)
+         });
+         const data = await res.json();
+         
+         if(data.status === 'success') {
+            paymentResult.className = 'result-box result-success';
+            paymentResult.innerHTML = `<h3>✅ ${data.title}</h3><p>${data.message}</p><p style="font-size:12px;opacity:0.8">ID: ${data.transID}</p>`;
+            
+            // UPDATE STATUS ITEM KEPADA "Pay" SECARA TEMPATAN
+            currentItemList.forEach(function(item) {
+               item.task = "Pay"; 
+            });
+            
+            // RE-RENDER SENARAI
+            renderList(currentItemList, false, 'payment-list-container');
+            renderList(currentItemList, false, 'list-container');
+            
+         } else {
+            paymentResult.className = 'result-box result-error';
+            paymentResult.innerHTML = `<h3>❌ ${data.title}</h3><p>${data.message}</p>`;
+         }
+       } catch(err) {
+          paymentResult.className = 'result-box result-error';
+          paymentResult.innerHTML = "Ralat sistem: " + err.message;
+       }
+    }
+
+    // --- PARCEL LOGIC ---
+    
     function formatDateForAPI(dateStr) {
       if (!dateStr) return '';
-      const parts = dateStr.split('-'); // YYYY-MM-DD
-      return `${parts[2]}/${parts[1]}/${parts[0]}`; // DD/MM/YYYY
+      const parts = dateStr.split('-'); 
+      return `${parts[2]}/${parts[1]}/${parts[0]}`; 
     }
 
-    // Fungsi Carian Manual
     function manualSearch() {
       const matrik = manualInput.value.trim();
-      if (!matrik) {
-        subtitleText.innerText = "⚠️ Sila masukkan No. Matrik";
-        return;
-      }
+      if (!matrik) { subtitleText.innerText = "⚠️ Sila masukkan No. Matrik"; return; }
       verifyData(matrik);
     }
 
@@ -344,16 +501,12 @@
         const res = await fetch(url);
         const data = await res.json();
 
-        // LOGIC STAF: Hanya papar container debug jika staf
         if (data.isStaff) {
-          debugContainer.style.display = 'block'; // Papar keseluruhan bahagian debug
-          // Jika switch sudah on, update terus output
-          if (isDebugMode) {
-             debugOutput.innerText = `USER: ${data.staffName}\nID: ${currentUserId || 'N/A'}\nSTATUS: Staff Detected`;
-          }
+          debugContainer.style.display = 'block';
+          if (isDebugMode) debugOutput.innerText = `USER: ${data.staffName}\nID: ${currentUserId}\nSTATUS: Staff`;
           subtitleText.innerText = "Selamat Datang, " + data.staffName;
         } else {
-          debugContainer.style.display = 'none'; // Sembunyikan jika bukan staf
+          debugContainer.style.display = 'none';
           subtitleText.innerText = "Selamat Datang";
         }
 
@@ -361,22 +514,16 @@
           subtitleText.innerText += ` Dijumpai ${data.list.length} item.`;
           rowsToUpdate = data.list.map(item => item.rowIndex);
           currentItemList = data.list;
-          renderList(currentItemList, false);
+          renderList(currentItemList, false, 'list-container');
           if (data.isStaff) collectBtn.style.display = 'flex';
-          if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
-            window.Telegram.WebApp.HapticFeedback.notificationOccurred('warning');
-          }
         } else if (data.status === 'not_found') {
           subtitleText.innerText += " Tiada item dalam julat tarikh ini.";
-          listContainer.innerHTML = `<div style="text-align:center; padding:20px; opacity:0.6;">Tiada rekod antara ${startDate} hingga ${endDate}</div>`;
+          listContainer.innerHTML = `<div style="text-align:center; padding:20px; opacity:0.6;">Tiada rekod</div>`;
         } else {
           subtitleText.innerText = "❌ " + data.message;
         }
       } catch (err) {
         subtitleText.innerText = "❌ Ralat: " + err.message;
-        if (isDebugMode) {
-            debugOutput.innerText += `\nERROR: ${err.message}`;
-        }
       } finally {
         setLoading(false);
       }
@@ -397,12 +544,9 @@
           subtitleText.innerHTML = "✅ <b>Berjaya dikemaskini!</b>";
           if (isDebugMode) debugOutput.innerText = "Status Update: SUCCESS";
           
-          renderList(currentItemList, true); 
+          renderList(currentItemList, true, 'list-container'); 
           collectBtn.style.display = 'none';
           rowsToUpdate = [];
-          if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
-            window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-          }
         } else {
           throw new Error(data.message);
         }
@@ -414,33 +558,40 @@
       }
     }
 
-    function renderList(items, isSuccess) {
+    // --- RENDER LIST (SUPPORT PAY & MULTI CONTAINER) ---
+    function renderList(items, isSuccess, targetId) {
+      const container = document.getElementById(targetId);
       const fragment = document.createDocumentFragment();
       
-      items.forEach((item, index) => {
+      items.forEach((item) => {
         const card = document.createElement('div');
         card.className = isSuccess ? 'item-card success-card' : 'item-card';
         
         var statusText = isSuccess ? "COLLECTED" : "PENDING";
         var pillClass = isSuccess ? "status-pill success-pill" : "status-pill";
-        var statusIcon = isSuccess 
-          ? `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="9" width="3" height="3" fill="currentColor"/><rect x="5" y="12" width="3" height="2" fill="currentColor"/><rect x="8" y="7" width="3" height="3" fill="currentColor"/><rect x="11" y="2" width="3" height="5" fill="currentColor"/></svg>` 
-          : `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="3" y="1" width="10" height="14" rx="5" stroke="currentColor" stroke-width="2" fill="none"/><rect x="7" y="4" width="2" height="4" fill="currentColor"/></svg>`;
+        
+        // LOGIC PAY: Check task
+        var payPillHtml = "";
+        if (!isSuccess && item.task && item.task.toLowerCase() === "pay") {
+           payPillHtml = '<div class="status-pill success-pill" style="margin-left:5px;">PAY</div>';
+        }
 
         card.innerHTML = `
-          <div class="card-row"><div class="${pillClass}">${statusIcon} ${statusText}</div></div>
-          <div class="item-name">${item.namaItem}</div>
-          <div class="item-meta">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="6" y="2" width="4" height="4" fill="#636E72"/><rect x="4" y="8" width="8" height="2" fill="#636E72"/><rect x="3" y="10" width="2" height="4" fill="#636E72"/><rect x="11" y="10" width="2" height="4" fill="#636E72"/></svg>
-            ${item.nama}
+          <div class="card-row">
+             <div style="display:flex; align-items:center;">
+                <div class="${pillClass}">${statusText}</div>
+                ${payPillHtml}
+             </div>
           </div>
+          <div class="item-name">${item.namaItem}</div>
+          <div class="item-meta">${item.nama}</div>
           <div class="item-meta" style="font-size: 14px; opacity: 0.8;">ID: ${item.noMatrik}</div>
         `;
         fragment.appendChild(card);
       });
       
-      listContainer.innerHTML = ''; 
-      listContainer.appendChild(fragment);
+      container.innerHTML = ''; 
+      container.appendChild(fragment);
     }
 
     function setLoading(isLoading) {
@@ -452,11 +603,10 @@
         scanBtn.innerHTML = `<svg class="pixel-icon" viewBox="0 0 16 16"><rect x="1" y="5" width="14" height="9" rx="2" fill="white"/><rect x="4" y="3" width="8" height="2" fill="white"/><rect x="5" y="7" width="6" height="5" rx="3" fill="#6C63FF"/><rect x="7" y="9" width="2" height="2" fill="white"/></svg> IMBAS QR`;
       }
     }
-
+    
     const style = document.createElement('style');
     style.innerHTML = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
     document.head.appendChild(style);
-
   </script>
 </body>
 </html>
