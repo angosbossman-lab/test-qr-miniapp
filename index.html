@@ -365,14 +365,26 @@
       }
     }
 
-    // --- FUNGSI BARU: UPDATE TAB BAYARAN ---
+    // --- FUNGSI BARU: UPDATE TAB BAYARAN (FILTER ITEM 'PAY') ---
     function updatePaymentTab() {
-      if (currentItemList.length > 0) {
-        renderList(currentItemList, false, 'payment-list-container');
+      // 1. Filter senarai: Ambil item yang TIDAK mempunyai task = "Pay"
+      var unpaidItems = currentItemList.filter(function(item) {
+        return !(item.task && item.task.toLowerCase() === "pay");
+      });
+
+      // 2. Paparkan senarai yang belum bayar
+      if (unpaidItems.length > 0) {
+        renderList(unpaidItems, false, 'payment-list-container');
       } else {
-        paymentListContainer.innerHTML = `<div style="text-align:center; padding:10px; color:#888; font-size:14px;">Tiada item. Cari di Tab Kutipan dahulu.</div>`;
+        paymentListContainer.innerHTML = `<div style="text-align:center; padding:20px; color:#888; font-size:14px;">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <br>Semua item telah dibayar.
+        </div>`;
       }
-      var total = currentItemList.length * 1.00;
+
+      // 3. Kira Jumlah Hanya untuk Item Belum Bayar
+      // Jika item kosong (semua dah bayar), total = 0
+      var total = unpaidItems.length * 1.00;
       payAmount.value = "RM " + total.toFixed(2);
     }
 
@@ -418,10 +430,20 @@
     async function submitPayment() {
        var notes = payNotes.value;
        var amountVal = payAmount.value;
-       var rowsString = rowsToUpdate.join(',');
        
-       if(currentItemList.length === 0) {
-         alert("Tiada item untuk dibayar. Cari item di Tab Kutipan dahulu.");
+       // --- PERUBAHAN: Hantar hanya item yang belum 'Pay' ---
+       // Kita filter currentItemList untuk dapatkan index baris yang belum bayar
+       var unpaidItems = currentItemList.filter(function(item) {
+         return !(item.task && item.task.toLowerCase() === "pay");
+       });
+
+       // Map kan rowIndex dari item yang belum bayar sahaja
+       var rowsToPayNow = unpaidItems.map(function(item) { return item.rowIndex; });
+       var rowsString = rowsToPayNow.join(',');
+
+       // Semakan jika tiada item untuk dibayar
+       if(unpaidItems.length === 0) {
+         alert("Tiada item untuk dibayar. Semua item dalam senarai telah dibayar.");
          return;
        }
        if(!currentFileBase64) {
@@ -440,7 +462,7 @@
            amount: amountVal, 
            imageBase64: currentFileBase64,
            userId: currentUserId,
-           rows: rowsString
+           rows: rowsString // Hantar hanya index yang belum bayar
          };
          
          const res = await fetch(SCRIPT_URL, {
@@ -453,13 +475,16 @@
             paymentResult.className = 'result-box result-success';
             paymentResult.innerHTML = `<h3>✅ ${data.title}</h3><p>${data.message}</p><p style="font-size:12px;opacity:0.8">ID: ${data.transID}</p>`;
             
-            // UPDATE STATUS ITEM KEPADA "Pay" SECARA TEMPATAN
-            currentItemList.forEach(function(item) {
+            // Update status item yang baru dibayar dalam memory tempatan
+            // Kita loop through unpaidItems dan set task = "Pay"
+            unpaidItems.forEach(function(item) {
                item.task = "Pay"; 
             });
+
+            // Re-render senarai di Tab Bayaran (Item yang baru bayar akan hilang)
+            updatePaymentTab();
             
-            // RE-RENDER SENARAI
-            renderList(currentItemList, false, 'payment-list-container');
+            // Update senarai di Tab Kutipan (Badge Pay akan muncul)
             renderList(currentItemList, false, 'list-container');
             
          } else {
@@ -630,4 +655,5 @@
   </script>
 </body>
 </html>
+
 
