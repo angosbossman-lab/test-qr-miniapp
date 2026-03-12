@@ -264,15 +264,17 @@
            <input type="text" id="pay-amount" class="input-field" placeholder="RM 0.00" readonly disabled>
          </div>
          
-         <label class="input-label">Gambar Resit</label>
+         <!-- UBAH LABEL TEKS -->
+         <label class="input-label">Resit (Gambar / PDF)</label>
          <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
            <div id="upload-placeholder">
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#6C63FF" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <p style="margin:5px 0 0 0; color:#6C63FF; font-weight:600;">Klik untuk pilih gambar</p>
+              <p style="margin:5px 0 0 0; color:#6C63FF; font-weight:600;">Klik untuk pilih gambar atau PDF</p>
            </div>
            <img id="previewImg" src="#" alt="Preview">
          </div>
-         <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="previewFile(this)">
+         <!-- TAMBAH .pdf PADA ACCEPT -->
+         <input type="file" id="fileInput" accept="image/*,.pdf" style="display:none" onchange="previewFile(this)">
        </div>
 
        <button class="btn-main btn-payment" onclick="submitPayment()">
@@ -381,17 +383,35 @@
       if (isDebugMode) debugOutput.innerText = "Debug Mode Diaktifkan...";
     }
 
-    // --- PAYMENT LOGIC ---
+    // --- PAYMENT LOGIC: PREVIEW FILE (GAMBAR & PDF) ---
     function previewFile(input) {
       if (input.files && input.files[0]) {
+        var file = input.files[0];
         var reader = new FileReader();
+        
         reader.onload = function(e) {
-          currentFileBase64 = e.target.result;
-          previewImg.src = e.target.result;
-          previewImg.style.display = 'block';
-          uploadPlaceholder.style.display = 'none';
+          currentFileBase64 = e.target.result; // Simpan base64
+          
+          // Check jika gambar
+          if (file.type.startsWith('image/')) {
+            previewImg.src = e.target.result;
+            previewImg.style.display = 'block';
+            uploadPlaceholder.style.display = 'none';
+          } 
+          // Jika PDF atau lain-lain
+          else {
+            previewImg.style.display = 'none';
+            uploadPlaceholder.style.display = 'block';
+            // Tunjuk ikon dokumen dan nama fail
+            uploadPlaceholder.innerHTML = `
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FF6584" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <p style="margin:5px 0 0 0; color:#FF6584; font-weight:600;">${file.name}</p>
+              <p style="margin:2px 0 0 0; font-size:12px; color:#888;">Fail PDF Dipilih</p>
+            `;
+          }
         }
-        reader.readAsDataURL(input.files[0]);
+        
+        reader.readAsDataURL(file);
       }
     }
 
@@ -405,7 +425,7 @@
          return;
        }
        if(!currentFileBase64) {
-         alert("Sila pilih gambar resit.");
+         alert("Sila pilih gambar resit / PDF.");
          return;
        }
        
@@ -610,3 +630,4 @@
   </script>
 </body>
 </html>
+
